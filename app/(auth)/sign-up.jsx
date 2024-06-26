@@ -8,6 +8,7 @@ import { Link } from "expo-router";
 import PasswordStrengthIndicator from "./TempFile";
 import { styled } from "nativewind";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Alert } from "react-native";
 
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledScrollView = styled(ScrollView);
@@ -198,7 +199,7 @@ const Inscription = () => {
             otherStyles='mt-2'
             secureTextEntry
           />
-
+          <PasswordStrengthIndicator strength={passwordStrength} />
           <FormField
             title='Confirmer le mot de passe'
             value={form.confirmPassword}
