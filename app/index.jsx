@@ -39,7 +39,7 @@ export default function App() {
 
           <CustomButton
             title="continuer avec l'email où n° de téléphone"
-            handlePress={() => router.push("/sign-in")}
+            handlePress={() => router.push("/home")}
             containerStyle='w-full mt-7'
           />
         </View>

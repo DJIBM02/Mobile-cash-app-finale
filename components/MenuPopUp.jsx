@@ -26,7 +26,7 @@ const MenuPopUp = () => {
     {
       title: "Paramétre",
       icon: "setting",
-      action: () => router.push("/paramétre"),
+      action: () => router.navigate("/params"),
     },
   ];
 

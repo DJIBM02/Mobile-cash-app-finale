@@ -1,8 +1,7 @@
-import { View, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";
 import "nativewind";
-import { Image } from "expo-image";
 import { router, usePathname } from "expo-router";
 
 const SearchInput = ({ value, placeholder, keyboardType, initialQuery }) => {

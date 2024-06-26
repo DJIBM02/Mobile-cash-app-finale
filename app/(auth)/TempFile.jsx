@@ -1,9 +1,6 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { styled } from "nativewind";
-
-const StyledView = styled(View);
-const StyledText = styled(Text);
+import "nativewind";
 
 const PasswordStrengthIndicator = ({ strength }) => {
   const getColor = () => {
@@ -20,18 +17,18 @@ const PasswordStrengthIndicator = ({ strength }) => {
   };
 
   return (
-    <StyledView className='flex-row gap-1 mt-1'>
-      <StyledView className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
-      <StyledView className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
-      <StyledView className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
-      <StyledText className='text-xs text-gray-400 mt-1'>
+    <View className='flex-row gap-1 mt-1'>
+      <View className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
+      <View className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
+      <View className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
+      <Text className='text-xs text-gray-400 mt-1'>
         {strength === "fort"
           ? "fort"
           : strength === "medium"
           ? "Medium"
           : "faible"}
-      </StyledText>
-    </StyledView>
+      </Text>
+    </View>
   );
 };
 

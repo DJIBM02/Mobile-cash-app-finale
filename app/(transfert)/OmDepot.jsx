@@ -74,7 +74,7 @@ const Om_Depot = ({}) => {
         </View>
 
         {/* Modal for Summary */}
-        <StyledModal
+        <Modal
           visible={isModalVisible}
           transparent={true}
           animationType='slide'
@@ -92,7 +92,7 @@ const Om_Depot = ({}) => {
               />
             </View>
           </View>
-        </StyledModal>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );

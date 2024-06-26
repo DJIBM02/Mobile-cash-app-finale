@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { router } from "expo-router";
 import { icons, images } from "../../constants";
 import "nativewind";
+import { Image } from "expo-image";
 import { useHeaderHeight } from "@react-navigation/elements";
 
 const Create = () => {

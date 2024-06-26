@@ -1,8 +1,7 @@
 import { View, Text } from "react-native";
 import { Tabs } from "expo-router";
-import { Image } from "expo-image";
 import { icons } from "../../constants";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Image } from "expo-image";
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -11,8 +10,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
         source={icon}
         contentFit='cover'
         tintColor={color}
-        className='min-h-[22px] min-w-[22px]'
-        transition={1000}
+        className='w-6 h-6'
       />
       <Text
         className={`${focused ? "font-psemibold" : "font-pregular"} text-xs`}
@@ -26,69 +24,67 @@ const TabIcon = ({ icon, color, name, focused }) => {
 
 const TabsLayout = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} className='bg-primary h-full'>
-      <Tabs
-        screenOptions={{
-          tabBarShowLabel: false,
-          tabBarActiveTintColor: "#bef264",
-          tabBarInactiveTintColor: "#CDCDE0",
-          tabBarStyle: {
-            backgroundColor: "#161622",
-            borderTopWidth: 1 / 2,
-            borderTopColor: "#4b5563",
-            height: 64,
-          },
+    <Tabs
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "#bef264",
+        tabBarInactiveTintColor: "#CDCDE0",
+        tabBarStyle: {
+          backgroundColor: "#161622",
+          borderTopWidth: 1 / 2,
+          borderTopColor: "#4b5563",
+          height: 64,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name='home'
+        options={{
+          title: "home",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.home}
+              color={color}
+              name='Accueil'
+              focused={focused}
+            />
+          ),
         }}
-      >
-        <Tabs.Screen
-          name='home'
-          options={{
-            title: "home",
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.home}
-                color={color}
-                name='Accueil'
-                focused={focused}
-              />
-            ),
-          }}
-        />
+      />
 
-        <Tabs.Screen
-          name='create'
-          options={{
-            title: "create",
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.profile}
-                color={color}
-                name='contact'
-                focused={focused}
-              />
-            ),
-          }}
-        />
+      <Tabs.Screen
+        name='create'
+        options={{
+          title: "create",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.profile}
+              color={color}
+              name='contact'
+              focused={focused}
+            />
+          ),
+        }}
+      />
 
-        <Tabs.Screen
-          name='bookmark'
-          options={{
-            title: "Bookmark",
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.bookmark}
-                color={color}
-                name='Historique'
-                focused={focused}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-    </GestureHandlerRootView>
+      <Tabs.Screen
+        name='bookmark'
+        options={{
+          title: "Bookmark",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.bookmark}
+              color={color}
+              name='Historique'
+              focused={focused}
+            />
+          ),
+        }}
+      />
+    </Tabs>
   );
 };
 

@@ -1,15 +1,15 @@
 import { router } from "expo-router";
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import "nativewind";
 
 const TransactionSuccess = () => {
   return (
-    <SafeAreaView className='bg-primary flex-1 justify-center items-center'>
-      <ScrollView>
-        <View className='items-center'>
+    <SafeAreaView className='bg-primary h-full  flex-1 justify-center items-center'>
+      <ScrollView contentContainerStyle={{ height: "100%" }}>
+        <View className='justify-center min-h-[85vh] top-72 items-center'>
           <Image
             source={images.success}
             resizeMode='contain'

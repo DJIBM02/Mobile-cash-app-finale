@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
-import { Image } from "expo-image";
 import "nativewind";
+import { Image } from "expo-image";
 
 const ServicesDépot = ({
   title,

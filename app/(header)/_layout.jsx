@@ -42,7 +42,7 @@ const TransfertLayout = () => {
           }}
         />
         <Stack.Screen
-          name='paramétre'
+          name='params'
           options={{
             headerTitle: "Paramétre",
             headerStyle: { backgroundColor: "#6b7280" },

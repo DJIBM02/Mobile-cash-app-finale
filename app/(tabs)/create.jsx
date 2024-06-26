@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Image,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +14,6 @@ import EmptyState from "../../components/EmptyState";
 import "nativewind";
 import ServicesContact from "../../components/ServicesContact";
 import SearchInput from "../../components/SearchInput";
-import { Image } from "expo-image";
 import { icons } from "../../constants";
 import { Ionicons } from "@expo/vector-icons";
 

@@ -1,13 +1,14 @@
 import { router } from "expo-router";
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { images } from "../../constants";
 
 const TransactionFailed = () => {
   return (
     <SafeAreaView className='bg-primary flex-1 justify-center items-center'>
       <ScrollView>
-        <View className='items-center'>
+        <View className='items-center min-h-[85vh] top-72'>
           <Image
             source={images.bad}
             resizeMode='contain'
@@ -17,9 +18,12 @@ const TransactionFailed = () => {
           <Text className='text-2xl text-white font-semibold mt-4'>
             Transaction echoué
           </Text>
-          <Text className='text-white mt-2'>
-            fonds insuffisant ou probléme de connection. S'il vous plait
-            veuillez réessayez
+          <Text className='text-white text-lg mt-2'>
+            fonds insuffisant ou probléme de connection.
+          </Text>
+          <Text className='text-white text-lg mt-2'>
+            {" "}
+            S'il vous plait veuillez réessayez
           </Text>
           <TouchableOpacity
             onPress={() => router.back()}

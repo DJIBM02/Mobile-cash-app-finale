@@ -5,13 +5,7 @@ import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
 import { Link } from "expo-router";
-import { styled } from "nativewind";
-
-const StyledSafeAreaView = styled(SafeAreaView);
-const StyledView = styled(View);
-const StyledImage = styled(Image);
-const StyledText = styled(Text);
-const StyledLink = styled(Link);
+import "nativewind";
 
 const Connection = () => {
   const [form, setForm] = useState({
@@ -23,19 +17,19 @@ const Connection = () => {
   const submit = () => {};
 
   return (
-    <StyledSafeAreaView className='bg-primary flex-1'>
+    <SafeAreaView className='bg-primary flex-1'>
       <ScrollView>
-        <StyledView className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
-          <StyledImage
+        <View className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
+          <Image
             source={images.logo}
             resizeMode='contain'
             className='w-24 h-16'
             alt='MaGeNo Logo'
           />
 
-          <StyledText className='text-2xl text-white font-semibold font-psemibold'>
+          <Text className='text-2xl text-white font-semibold font-psemibold'>
             Connectez-vous à MaGeNo
-          </StyledText>
+          </Text>
 
           <FormField
             title='Email'
@@ -45,9 +39,9 @@ const Connection = () => {
             keyboardType='email-address'
           />
 
-          <StyledView className='flex justify-end items-end mt-1'>
-            <StyledText className='text-gray-100'>(Optionnel)</StyledText>
-          </StyledView>
+          <View className='flex justify-end items-end mt-1'>
+            <Text className='text-gray-100'>(Optionnel)</Text>
+          </View>
 
           <FormField
             title='Mot de passe'
@@ -57,14 +51,14 @@ const Connection = () => {
             secureTextEntry
           />
 
-          <StyledView className='flex justify-end pt-1'>
-            <StyledLink
+          <View className='flex justify-end pt-1'>
+            <Link
               href='/resetPassword'
               className='text-secondary-100 underline mt-1'
             >
               Mot de passe oublié?
-            </StyledLink>
-          </StyledView>
+            </Link>
+          </View>
 
           <CustomButton
             title='Connexion'
@@ -73,20 +67,20 @@ const Connection = () => {
             isLoading={isSubmitting}
           />
 
-          <StyledView className='flex justify-center pt-4 flex-row gap-2'>
-            <StyledText className='text-base text-gray-100 font-medium'>
+          <View className='flex justify-center pt-4 flex-row gap-2'>
+            <Text className='text-base text-gray-100 font-medium'>
               Créer un compte?
-            </StyledText>
-            <StyledLink
+            </Text>
+            <Link
               href='/sign-up'
               className='text-base font-medium text-secondary underline'
             >
               Inscrivez-vous
-            </StyledLink>
-          </StyledView>
-        </StyledView>
+            </Link>
+          </View>
+        </View>
       </ScrollView>
-    </StyledSafeAreaView>
+    </SafeAreaView>
   );
 };
 

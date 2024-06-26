@@ -1,20 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, Image, ScrollView, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
 import { Link } from "expo-router";
 import PasswordStrengthIndicator from "./TempFile";
-import { styled } from "nativewind";
+import "nativewind";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Alert } from "react-native";
-
-const StyledSafeAreaView = styled(SafeAreaView);
-const StyledScrollView = styled(ScrollView);
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledImage = styled(Image);
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const Inscription = () => {
   const [form, setForm] = useState({
@@ -30,7 +32,6 @@ const Inscription = () => {
     number: "+237",
     password: "",
     pin: "",
-    confirmPassword: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,18 +67,18 @@ const Inscription = () => {
   };
 
   return (
-    <StyledSafeAreaView className='bg-primary h-full'>
-      <StyledScrollView>
-        <StyledView className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
-          <StyledImage
+    <SafeAreaView className='bg-primary h-full'>
+      <ScrollView>
+        <View className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
+          <Image
             source={images.logo}
             resizeMode='contain'
             className='w-24 h-16'
           />
 
-          <StyledText className='text-2xl text-white font-semibold font-psemibold'>
+          <Text className='text-2xl text-white font-semibold font-psemibold'>
             Inscription
-          </StyledText>
+          </Text>
 
           <FormField
             title='Nom'
@@ -95,20 +96,22 @@ const Inscription = () => {
             keyboardType='default'
           />
 
-          <StyledView className='mt-2'>
-            <StyledText className='text-white'>Date de naissance</StyledText>
-            <StyledView className='flex-row items-center'>
+          <View className='mt-2'>
+            <Text className='text-white'>Date de naissance</Text>
+            <View className='flex-row  items-center'>
               <FormField
                 value={form.date_of_birth.toDateString()}
                 editable={false}
                 handleChangeText={() => {}}
                 otherStyles='flex-1'
               />
-              <CustomButton
-                title='Sélectionner'
-                handlePress={() => setShowDatePicker(true)}
-              />
-            </StyledView>
+              <TouchableOpacity
+                className='bg-indigo-600 mt-6  w-9 h-8 justify-center items-center rounded'
+                onPress={() => setShowDatePicker(true)}
+              >
+                <AntDesign name='calendar' size={30} color='white' />
+              </TouchableOpacity>
+            </View>
             {showDatePicker && (
               <DateTimePicker
                 value={form.date_of_birth}
@@ -117,7 +120,7 @@ const Inscription = () => {
                 onChange={onChangeDate}
               />
             )}
-          </StyledView>
+          </View>
 
           <FormField
             title='Pays'
@@ -166,7 +169,7 @@ const Inscription = () => {
             keyboardType='email-address'
           />
 
-          <StyledView className='mt-2 flex-row items-center'>
+          <View className='mt-2 flex-row items-center'>
             <FormField
               value={form.number}
               handleChangeText={(e) => setForm({ ...form, number: e })}
@@ -174,7 +177,7 @@ const Inscription = () => {
               keyboardType='phone-pad'
               placeholder='Votre numéro'
             />
-          </StyledView>
+          </View>
 
           <FormField
             title='Code Pin'
@@ -185,9 +188,9 @@ const Inscription = () => {
             placeholder='Code à 6 chiffres'
           />
 
-          <StyledView className='justify-end items-end'>
-            <StyledText className='text-gray-100 mt-1'>(Optionnel)</StyledText>
-          </StyledView>
+          <View className='justify-end items-end'>
+            <Text className='text-gray-100 mt-1'>(Optionnel)</Text>
+          </View>
 
           <FormField
             title='Mot de passe'
@@ -217,20 +220,20 @@ const Inscription = () => {
             isLoading={isSubmitting}
           />
 
-          <StyledView className='justify-center pt-1 flex-row gap-2'>
-            <StyledText className='text-base text-gray-100 font-medium'>
+          <View className='justify-center pt-1 flex-row gap-2'>
+            <Text className='text-base text-gray-100 font-medium'>
               Déjà un compte?
-            </StyledText>
+            </Text>
             <Link
               href='/sign-in'
               className='text-base font-medium text-secondary underline'
             >
               Connectez-vous
             </Link>
-          </StyledView>
-        </StyledView>
-      </StyledScrollView>
-    </StyledSafeAreaView>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

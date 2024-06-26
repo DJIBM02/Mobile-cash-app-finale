@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Alert } from "react-native";
+import { View, TouchableOpacity, Alert, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Image } from "expo-image";
 import "nativewind";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -45,7 +44,7 @@ const ProfileImagePicker = ({ setProfileImage }) => {
           />
         ) : (
           <View className='w-25 h-25 rounded-full bg-gray-200 justify-center items-center mt-8'>
-            <Ionicons name='camera' size={50} color='gray' />
+            <Ionicons name='camera' size={46} color='gray' />
           </View>
         )}
       </TouchableOpacity>

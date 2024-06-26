@@ -95,27 +95,32 @@ const Visa_Dépot = () => {
                 otherStyles='mt-3'
                 keyboardType='numeric'
               />
-              <TouchableOpacity
-                className='w-5 m-3 '
-                onPress={() => setShowDatePicker(true)}
-              >
+              <View className='flex-row justify-around relative'>
+                <Text className='text-m top-3 left-14 text-gray-100 font-pmedium'>
+                  Date d'expiration
+                </Text>
+                <TouchableOpacity
+                  className='w-4/12 top-5 mr-12 right-16'
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <FormField
+                    value={form.expiryDate}
+                    handleChangeText={() => {}}
+                    otherStyles='w-[150px]'
+                    placeholder='MM/AA'
+                    editable={false} // Make the text input read-only
+                  />
+                </TouchableOpacity>
+
                 <FormField
-                  title="Date d'expiration"
-                  value={form.expiryDate}
-                  handleChangeText={() => {}}
-                  otherStyles='mt-3'
-                  placeholder='MM/AA'
-                  editable={true} // Make the text input read-only
+                  title='CVV'
+                  value={form.cvv}
+                  handleChangeText={(e) => setForm({ ...form, cvv: e })}
+                  otherStyles='mt-3 w-4/12'
+                  keyboardType='numeric'
+                  secureTextEntry={true}
                 />
-              </TouchableOpacity>
-              <FormField
-                title='CVV'
-                value={form.cvv}
-                handleChangeText={(e) => setForm({ ...form, cvv: e })}
-                otherStyles='mt-3'
-                keyboardType='numeric'
-                secureTextEntry={true}
-              />
+              </View>
             </View>
           </View>
           <CustomButton

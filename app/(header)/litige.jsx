@@ -7,10 +7,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "nativewind";
-import { Image } from "expo-image";
 import { icons } from "../../constants";
 import Ionicons from "@expo/vector-icons/Ionicons";
 

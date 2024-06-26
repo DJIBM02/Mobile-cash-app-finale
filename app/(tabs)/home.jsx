@@ -6,17 +6,20 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { icons, images } from "../../constants";
 import ProfileImagePicker from "../../components/ProfileImagePicker";
 import ImageSlider from "../../components/ImageSlideshow";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
 import { router } from "expo-router";
 import CurrencyDisplay from "../../components/CurrencyDisplay";
 import MenuPopUp from "../../components/MenuPopUp";
 import "nativewind";
+
+const fetchUserName = async () => {
+  return {};
+};
 
 const fetchAccountBalance = async () => {
   return new Promise((resolve) => {
@@ -41,12 +44,24 @@ const formatCardNumber = (number) => {
   return `${visibleDigits}${hiddenDigits}`;
 };
 
+const fetchNotifications = async () => {
+  // Mock function to simulate fetching notifications
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([{ id: 1, message: "New transaction completed." }]); // Example notifications
+    }, 1000);
+  });
+};
+
 const Home = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [accountBalance, setAccountBalance] = useState(null);
   const [cardNumber, setCardNumber] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [user, setUser] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -58,13 +73,21 @@ const Home = () => {
     const getBalanceAndCard = async () => {
       const balance = await fetchAccountBalance();
       const card = await fetchCardNumber();
+      const notifications = await fetchNotifications();
       setAccountBalance(balance);
       setCardNumber(card);
+      setNotifications(notifications);
+      setHasUnreadNotifications(notifications.length > 0);
       setLoading(false);
     };
 
     getBalanceAndCard();
   }, []);
+
+  const handleNotificationPress = () => {
+    setHasUnreadNotifications(false);
+    router.navigate("notifications");
+  };
 
   return (
     <SafeAreaView className='bg-primary h-full'>
@@ -99,14 +122,17 @@ const Home = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    className='h-9 w-10 rounded-full bg-gray-700 justify-center items-center'
-                    onPress={() => router.navigate("notifications")}
+                    className='h-9 w-10 rounded-full bg-gray-700 justify-center items-center relative'
+                    onPress={handleNotificationPress}
                   >
                     <Image
                       source={icons.bell}
                       className='w-7 h-7'
                       contentFit='cover'
                     />
+                    {hasUnreadNotifications && (
+                      <View className='absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full' />
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
