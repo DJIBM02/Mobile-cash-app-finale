@@ -33,7 +33,7 @@ const TabsLayout = () => {
           backgroundColor: "#161622",
           borderTopWidth: 1 / 2,
           borderTopColor: "#4b5563",
-          height: 64,
+          height: 58,
         },
       }}
     >
@@ -79,6 +79,22 @@ const TabsLayout = () => {
               icon={icons.bookmark}
               color={color}
               name='Historique'
+              focused={focused}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name='lit'
+        options={{
+          title: "Litige",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.plus}
+              color={color}
+              name='Litige'
               focused={focused}
             />
           ),

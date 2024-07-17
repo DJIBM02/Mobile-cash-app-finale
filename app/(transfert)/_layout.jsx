@@ -15,8 +15,8 @@ const TransfertLayout = () => {
             headerLargeTitle: true,
             headerLargeTitleStyle: { color: "#bef264" },
             headerBackTitleStyle: { backgroundColor: "#ffffff" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
         <Stack.Screen
@@ -26,19 +26,19 @@ const TransfertLayout = () => {
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
         <Stack.Screen
           name='Transfer'
           options={{
-            headerTitle: " Transfer",
+            headerTitle: " Transfert",
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
         <Stack.Screen name='ServicesDépot' options={{ headerShown: false }} />
@@ -49,8 +49,8 @@ const TransfertLayout = () => {
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
         <Stack.Screen
@@ -60,19 +60,20 @@ const TransfertLayout = () => {
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
         <Stack.Screen
           name='VisaDepot'
           options={{
-            headerTitle: "Dépot Visa",
+            headerTitle: "Ajouter une Carte ",
+            headerTitleStyle: { color: "#bef264" },
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
         <Stack.Screen
@@ -90,8 +91,31 @@ const TransfertLayout = () => {
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },
-            headerLargeTitleShadowVisible: false,
-            headerShadowVisible: false,
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
+          }}
+        />
+        <Stack.Screen
+          name='Depot_carte'
+          options={{
+            headerTitle: "Dépot avec carte bancaire",
+            headerStyle: { backgroundColor: "#6b7280" },
+            headerTransparent: true,
+            headerLargeTitleStyle: { color: "#bef264" },
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
+          }}
+        />
+
+        <Stack.Screen
+          name='Dépot_bancair'
+          options={{
+            headerTitle: "Dépot avec carte bancaire",
+            headerStyle: { backgroundColor: "#6b7280" },
+            headerTransparent: true,
+            headerLargeTitleStyle: { color: "#bef264" },
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
           }}
         />
       </Stack>

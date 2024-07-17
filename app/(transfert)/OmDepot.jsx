@@ -50,16 +50,16 @@ const Om_Depot = ({}) => {
             />
             <View className='pb-5 w-full px-4'>
               <FormField
-                title='Montant'
-                value={form.montant}
-                handleChangeText={(e) => setForm({ ...form, montant: e })}
+                title='Numéro'
+                value={form.number}
+                handleChangeText={(e) => setForm({ ...form, number: e })}
                 otherStyles='mt-3'
                 keyboardType='numeric'
               />
               <FormField
-                title='Numéro'
-                value={form.number}
-                handleChangeText={(e) => setForm({ ...form, number: e })}
+                title='Montant'
+                value={form.montant}
+                handleChangeText={(e) => setForm({ ...form, montant: e })}
                 otherStyles='mt-3'
                 keyboardType='numeric'
               />
@@ -68,7 +68,7 @@ const Om_Depot = ({}) => {
           <CustomButton
             title='faire le dépot'
             handlePress={submit}
-            containerStyle='justify-center items-center'
+            containerStyle='justify-center items-center ml-3'
             isLoading={isSubmitting}
           />
         </View>

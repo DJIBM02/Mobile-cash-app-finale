@@ -9,7 +9,7 @@ const TransactionSuccess = () => {
   return (
     <SafeAreaView className='bg-primary h-full  flex-1 justify-center items-center'>
       <ScrollView contentContainerStyle={{ height: "100%" }}>
-        <View className='justify-center min-h-[85vh] top-72 items-center'>
+        <View className='justify-center min-h-[85vh] top-50 items-center'>
           <Image
             source={images.success}
             resizeMode='contain'

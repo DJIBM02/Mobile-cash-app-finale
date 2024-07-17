@@ -14,7 +14,7 @@ const ServicesDépot = ({
     <View className={`justify-center items-center px-4 ${containerStyle}`}>
       <Image
         source={imageSource}
-        className={`w-[280px] h-[240px] ${imageStyle}`}
+        className={`w-[200px] h-[180px] ${imageStyle}`}
         contentFit='cover'
       />
       <Text

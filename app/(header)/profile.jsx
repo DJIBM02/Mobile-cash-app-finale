@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   View,
   Text,
@@ -5,15 +6,14 @@ import {
   RefreshControl,
   TouchableOpacity,
   Modal,
-  Button,
   Alert,
   Image,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../constants";
-import ServicesContact from "../../components/ServicesContact";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import "nativewind";
 
 const fetchUserProfile = async () => {
@@ -40,9 +40,9 @@ const formatCardNumber = (number, reveal) => {
 const Profile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [profile, setProfile] = useState({});
-  const [loading, setLoading] = useState(true);
   const [showCardNumber, setShowCardNumber] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -51,7 +51,7 @@ const Profile = () => {
     setRefreshing(false);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     onRefresh();
   }, []);
 
@@ -59,11 +59,20 @@ const Profile = () => {
     setShowCardNumber(!showCardNumber);
   };
 
-  const handleLogout = () => {
-    if (TouchableOpacity.onPress) {
-      Alert.alert("Voulez vous vraiment vous vraiment vous deconnecter!");
-      router.push("/sign-in");
-    }
+  const handleLogout = async () => {
+    Alert.alert("Déconnexion", "Voulez-vous vraiment vous déconnecter?", [
+      {
+        text: "Annuler",
+        style: "cancel",
+      },
+      {
+        text: "Déconnecter",
+        onPress: async () => {
+          await AsyncStorage.setItem("isLoggedIn", "false");
+          router.push("/sign-in");
+        },
+      },
+    ]);
   };
 
   return (
@@ -107,7 +116,7 @@ const Profile = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 className='bg-gray-800 mt-4 rounded-xl justify-center items-center w-12 h-12'
-                onPress={() => handleLogout}
+                onPress={handleLogout}
               >
                 <Image
                   source={icons.logout}
@@ -116,8 +125,7 @@ const Profile = () => {
                 />
               </TouchableOpacity>
               <Text className='font-pmedium text-white mt-1'>
-                {" "}
-                Se deconnecter{" "}
+                Se déconnecter
               </Text>
             </View>
           )}

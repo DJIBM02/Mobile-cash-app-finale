@@ -1,145 +1,222 @@
-import { View, Text, Image, ScrollView, Modal, TextInput } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { View, Text, ScrollView, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
-import "nativewind";
-import { router } from "expo-router";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { useRouter, useGlobalSearchParams } from "expo-router";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Dépot = ({}) => {
+// Constants
+const API_BASE_URL = "http://192.168.1.198:3000/api";
+const ERROR_MESSAGES = {
+  NO_TOKEN: "No authentication token found. Please log in again.",
+  MISSING_FIELDS: "Receiver email and amount are required.",
+  NETWORK_ERROR: "Network error. Please check your connection and try again.",
+  UNKNOWN_ERROR: "An unknown error occurred. Please try again later.",
+};
+
+const Transfer = () => {
+  const router = useRouter();
+  const { contact } = useGlobalSearchParams();
+  const contactData = useMemo(
+    () => (contact ? JSON.parse(contact) : null),
+    [contact]
+  );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
-    dépot: "",
-    userName: "",
+    receiverEmail: "",
+    amount: "",
     pin: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [transactionStatus, setTransactionStatus] = useState(null);
-  const [isPinInputVisible, setIsPinInputVisible] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [transactionId, setTransactionId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const submit = () => {
-    // Show the custom numeric keyboard for PIN input
-    setIsPinInputVisible(true);
-  };
+  useEffect(() => {
+    if (contactData) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        receiverEmail: contactData.email || "",
+      }));
+    }
+  }, [contactData]);
 
-  const handleTransactionSubmit = async () => {
-    setIsSubmitting(true);
-    // Simulate a network request
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const success = Math.random() > 0.5; // Simulate success or failure
-      setTransactionStatus(success ? "success" : "failure");
-      setIsModalVisible(false);
-      if (success) {
-        router.navigate("/TransactionSuccess");
-      } else {
-        router.navigate("/TransactionFailure");
-      }
-    }, 2000);
-  };
+  useEffect(() => {
+    const isValid = form.receiverEmail && form.amount;
+    setIsFormValid(isValid);
+  }, [form.receiverEmail, form.amount]);
 
-  const handlePinInput = (pin) => {
-    if (pin.length <= 6) {
-      setForm({ ...form, pin });
+  const handleInputChange = useCallback((field, value) => {
+    setForm((prevForm) => ({ ...prevForm, [field]: value }));
+  }, []);
+
+  const validateForm = () => {
+    if (!form.receiverEmail || !form.amount) {
+      throw new Error(ERROR_MESSAGES.MISSING_FIELDS);
     }
   };
+
+  const createTransaction = async (token) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/transaction/create`,
+        {
+          receiver: form.receiverEmail,
+          amount: parseFloat(form.amount),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      throw error;
+    }
+  };
+
+  const handleTransfer = async () => {
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+
+      validateForm();
+
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error(ERROR_MESSAGES.NO_TOKEN);
+
+      const data = await createTransaction(token);
+
+      setTransactionId(data.transaction_id);
+      setModalVisible(true);
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          error.message ||
+          ERROR_MESSAGES.UNKNOWN_ERROR
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleTransactionConfirmation = async () => {
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error(ERROR_MESSAGES.NO_TOKEN);
+
+      const response = await axios.put(
+        `${API_BASE_URL}/transaction/confirm/${transactionId}`,
+        { pin: form.pin },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 200) {
+        setModalVisible(false);
+        router.push("/TransactionSuccess");
+      } else {
+        throw new Error("Failed to confirm transaction.");
+      }
+    } catch (error) {
+      console.error("Error confirming transaction:", error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          error.message ||
+          ERROR_MESSAGES.UNKNOWN_ERROR
+      );
+      setModalVisible(false);
+      router.push("/TransactionFailed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isSubmitDisabled = useMemo(() => {
+    return !isFormValid || isSubmitting;
+  }, [isFormValid, isSubmitting]);
 
   return (
     <SafeAreaView className='bg-primary flex-1'>
       <ScrollView>
         <View className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
-          <Image
-            source={images.logo}
-            resizeMode='contain'
-            className='w-24 h-16'
-            alt='MaGeNo Logo'
-          />
-
           <Text className='text-2xl text-white font-semibold font-psemibold'>
-            Faire un Dépot
+            Faire un Transfert
           </Text>
 
+          {errorMessage && (
+            <Text className='text-red-500 mt-2'>{errorMessage}</Text>
+          )}
+
           <FormField
-            title='Montant'
-            value={form.dépot}
-            handleChangeText={(e) => setForm({ ...form, dépot: e })}
+            title='E-mail du receveur'
+            value={form.receiverEmail}
+            handleChangeText={(e) => handleInputChange("receiverEmail", e)}
+            otherStyles='mt-4'
+          />
+
+          <FormField
+            title='Amount'
+            value={form.amount}
+            handleChangeText={(e) => handleInputChange("amount", e)}
             otherStyles='mt-4'
             keyboardType='numeric'
           />
 
-          <FormField
-            title='userName'
-            value={form.userName}
-            handleChangeText={(e) => setForm({ ...form, userName: e })}
-            otherStyles='mt-4'
+          <CustomButton
+            title='Submit'
+            handlePress={handleTransfer}
+            containerStyle='mt-3'
+            isLoading={isSubmitting}
+            disabled={isSubmitDisabled}
           />
-
-          {!isPinInputVisible && (
-            <CustomButton
-              title='envoyé'
-              handlePress={submit}
-              containerStyle='mt-3'
-              isLoading={isSubmitting}
-            />
-          )}
-
-          {isPinInputVisible && (
-            <View className='mt-4'>
-              <Text className='text-lg text-white mb-2'>
-                Entrez le code PIN
-              </Text>
-              <TextInput
-                style={{
-                  height: 40,
-                  borderColor: "gray",
-                  borderWidth: 1,
-                  backgroundColor: "white",
-                  paddingHorizontal: 8,
-                }}
-                value={form.pin}
-                onChangeText={handlePinInput}
-                keyboardType='numeric'
-                maxLength={6}
-                secureTextEntry={true}
-              />
-              <CustomButton
-                title='Submit'
-                handlePress={() => setIsModalVisible(true)}
-                containerStyle='mt-3'
-                isLoading={isSubmitting}
-              />
-            </View>
-          )}
         </View>
       </ScrollView>
 
-      {/* ModalllScrollView for Transaction Summary */}
       <Modal
-        visible={isModalVisible}
-        transparent={true}
         animationType='slide'
-        onRequestClose={() => setIsModalVisible(false)}
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <View className='flex-1 justify-center items-center bg-black bg-opacity-50'>
-          <View className='bg-white p-5 rounded-lg w-4/5'>
-            <Text className='text-lg font-bold mb-4'>Résumé du dépot</Text>
-            <Text className='mb-2'>Montant: {form.dépot}</Text>
-            <Text className='mb-2'>Nom d'utilisateur: {form.userName}</Text>
-            <Text className='mb-2'>Code Pin: {form.pin}</Text>
+        <View className='flex-1 justify-center items-center bg-transparent bg-opacity-50'>
+          <View className='bg-primary p-5 rounded-lg w-4/5'>
+            <Text className='text-xl text-white font-bold mb-4'>
+              Confirm Transaction
+            </Text>
+            <Text className='text-md text-white font-psemibold mb-4'>
+              Receveur: {form.receiverEmail}
+            </Text>
+            <Text className='text-md text-white font-psemibold mb-4'>
+              Montant: {form.amount}
+            </Text>
+            <FormField
+              title='PIN'
+              value={form.pin}
+              handleChangeText={(e) => handleInputChange("pin", e)}
+              keyboardType='numeric'
+              secureTextEntry={true}
+            />
             <CustomButton
-              title='Submit'
-              handlePress={handleTransactionSubmit}
+              title='Confirm'
+              handlePress={handleTransactionConfirmation}
               containerStyle='mt-3'
               isLoading={isSubmitting}
             />
-            <TouchableOpacity
-              className='absolute top-2 right-2'
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text className='text-lg text-red-500'>X</Text>
-            </TouchableOpacity>
+            <CustomButton
+              title='Cancel'
+              handlePress={() => setModalVisible(false)}
+              containerStyle='mt-2'
+              type='secondary'
+            />
           </View>
         </View>
       </Modal>
@@ -147,4 +224,4 @@ const Dépot = ({}) => {
   );
 };
 
-export default Dépot;
+export default Transfer;

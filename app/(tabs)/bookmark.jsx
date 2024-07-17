@@ -1,9 +1,8 @@
 import { View, Text, FlatList, RefreshControl } from "react-native";
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import EmptyState from "../../components/EmptyState";
 import "nativewind";
-import ServicesContact from "../../components/ServicesContact";
+
 import { router } from "expo-router";
 
 const Create = () => {
@@ -25,16 +24,13 @@ const Create = () => {
             <Text className='text-3xl text-white'>{item.id}</Text> // Correction ici
           )}
           ListHeaderComponent={() => (
-            <View className='my-6 px-4 space-y-6 '>
+            <View className='my-6 px-  space-y-6 '>
               <View className='justify-between items-start flex-row mb-6 border-b-[1px] border-gray-700'>
                 <Text className='font-pmedium text-lg mb-4 text-gray-100'>
                   Historique des transactions
                 </Text>
               </View>
               <View className='flex-row items-center px-4 my-6'></View>
-              <ServicesContact
-                posts={[{ id: 1 }, { id: 2 }, { id: 3 }] ?? []}
-              />
             </View>
           )}
           ListEmptyComponent={() => (

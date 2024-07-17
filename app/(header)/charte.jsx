@@ -1,96 +1,243 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, RefreshControl, Dimensions } from "react-native";
+// @ts-nocheck
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  Dimensions,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PieChart } from "react-native-chart-kit";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import "nativewind";
+
+const API_BASE_URL = "http://192.168.43.238:3000/api";
 
 const Charte = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [transactions, setTransactions] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [timeframe, setTimeframe] = useState("monthly");
+  const [totalReceived, setTotalReceived] = useState(0);
+  const [totalSent, setTotalSent] = useState(0);
+  const [receivedPercentage, setReceivedPercentage] = useState(0);
+  const [sentPercentage, setSentPercentage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = async (url, params = {}) => {
+    setIsLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch data:", error.message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const processTransactionData = (data) => {
+    const {
+      total_received_Transaction = 0,
+      total_sent_Transaction = 0,
+      received_transactions = [],
+      sent_transactions = [],
+      sent_percentage = 0,
+      received_percentage = 0,
+    } = data;
+
+    setTotalReceived(parseFloat(total_received_Transaction));
+    setTotalSent(parseFloat(total_sent_Transaction));
+    setReceivedPercentage(received_percentage);
+    setSentPercentage(sent_percentage);
+    setTransactions(
+      [...received_transactions, ...sent_transactions].sort(
+        (a, b) => new Date(b.created) - new Date(a.created)
+      )
+    );
+    setChartData([
+      {
+        name: "Entrées",
+        amount: received_percentage,
+        color: "#4CAF50",
+        legendFontColor: "#fff",
+        legendFontSize: 12,
+      },
+      {
+        name: "Sorties",
+        amount: sent_percentage,
+        color: "#FF5252",
+        legendFontColor: "#fff",
+        legendFontSize: 12,
+      },
+    ]);
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const data = await fetchData(`${API_BASE_URL}/transactions`);
+      processTransactionData(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error.message);
+    }
+  };
+
+  const fetchFilteredTransactions = async () => {
+    try {
+      const data = await fetchData(`${API_BASE_URL}/transactions/filter`, {
+        timeframe,
+      });
+      processTransactionData(data);
+    } catch (error) {
+      if (error.response?.status === 400) {
+        console.error("Invalid timeframe:", timeframe);
+        setTimeframe("monthly");
+      } else {
+        console.error("Error fetching filtered transactions:", error.message);
+      }
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Mock refresh logic here
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate network request
-    setTransactions(mockTransactions());
+    await fetchTransactions();
     setRefreshing(false);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchTransactions();
+    }, [])
+  );
+
   useEffect(() => {
-    // Mocking the transactions data
-    setTransactions(mockTransactions());
-  }, []);
+    fetchFilteredTransactions();
+  }, [timeframe]);
 
-  // Mock transactions data
-  const mockTransactions = () => [
-    { id: 1, date: "2024-05-23 14:23", amount: "+200.00" },
-    { id: 2, date: "2024-05-21 11:11", amount: "-50.00" },
-    { id: 3, date: "2024-05-19 16:45", amount: "+150.00" },
-    { id: 4, date: "2024-05-15 08:30", amount: "-30.00" },
-    { id: 5, date: "2024-05-13 09:22", amount: "+300.00" },
-    { id: 6, date: "2024-05-10 12:35", amount: "-20.00" },
-  ];
+  const formatAmount = (amount) => {
+    return (
+      amount?.toLocaleString("fr-FR", {
+        style: "currency",
+        currency: "XAF",
+      }) || "0 FCFA"
+    );
+  };
 
-  const data = [
-    {
-      name: "Entrées",
-      amount: 650,
-      color: "#4CAF50",
-      legendFontColor: "#fff",
-      legendFontSize: 15,
-    },
-    {
-      name: "Sorties",
-      amount: 100,
-      color: "#FF5252",
-      legendFontColor: "#fff",
-      legendFontSize: 15,
-    },
-  ];
+  const renderTransaction = ({ item }) => (
+    <View className='flex-row justify-between items-center py-3 border-b border-gray-700'>
+      <View>
+        <Text className='text-white font-medium'>
+          {new Date(item.created).toLocaleDateString()}
+        </Text>
+        <Text className='text-gray-400 text-xs'>
+          {new Date(item.created).toLocaleTimeString()}
+        </Text>
+      </View>
+      <Text
+        className={`text-base ${
+          item.senders_id ? "text-red-500" : "text-green-500"
+        }`}
+      >
+        {item.senders_id ? "-" : "+"}
+        {formatAmount(parseFloat(item.amount.$numberDecimal))}
+      </Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView className='bg-primary h-full '>
-      <View className='flex-1  p-4'>
-        <View className='my-6 space-y-6 border-b-[1px] border-black-200'>
-          <Text className='font-pmedium text-lg text-gray-100'>Charte</Text>
-          <PieChart
-            data={data}
-            width={Dimensions.get("window").width - 50}
-            height={220}
-            chartConfig={{
-              backgroundColor: "#161622",
-              backgroundGradientFrom: "#1E1E2F",
-              backgroundGradientTo: "#6366f1",
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            }}
-            accessor='amount'
-            backgroundColor='transparent'
-            paddingLeft='15'
-            absolute
-          />
-          <View className='flex-row justify-between items-center mt-4 border-t border-gray-600 pt-4'>
-            <Text className='text-white'>Entrées</Text>
-            <Text className='text-green-500 text-2xl'>↑</Text>
-          </View>
-          <View className='flex-row justify-between items-center mb-4 border-b border-gray-600 pb-4'>
-            <Text className='text-white'>Sorties</Text>
-            <Text className='text-red-500 text-2xl'>↓</Text>
-          </View>
-          <FlatList
-            data={transactions}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View className='flex-row justify-between items-center py-2 border-b border-gray-700'>
-                <Text className='text-white'>{item.date}</Text>
-                <Text className='text-white'>{item.amount}FcFa</Text>
+    <SafeAreaView className='bg-primary flex-1'>
+      <View className='flex-1 p-4'>
+        <Text className='font-bold text-2xl text-gray-100 mb-6'>
+          Statistiques Financières
+        </Text>
+
+        {isLoading ? (
+          <ActivityIndicator size='large' color='#6366f1' />
+        ) : (
+          <>
+            <View className='bg-gray-800 rounded-lg p-4 mb-6'>
+              <PieChart
+                data={chartData}
+                width={Dimensions.get("window").width - 50}
+                height={200}
+                chartConfig={{
+                  backgroundColor: "#1e1e1e",
+                  backgroundGradientFrom: "#1e1e1e",
+                  backgroundGradientTo: "#1e1e1e",
+                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  labelColor: (opacity = 1) =>
+                    `rgba(255, 255, 255, ${opacity})`,
+                }}
+                accessor='amount'
+                backgroundColor='transparent'
+                paddingLeft='15'
+                absolute
+              />
+            </View>
+
+            <View className='flex-row justify-around mb-6'>
+              <View className='items-center'>
+                <Text className='text-green-500 text-lg font-bold'>
+                  ↑ Entrées
+                </Text>
+                <Text className='text-white'>
+                  {formatAmount(totalReceived)} ({receivedPercentage}%)
+                </Text>
               </View>
-            )}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          />
-        </View>
+              <View className='items-center'>
+                <Text className='text-red-500 text-lg font-bold'>
+                  ↓ Sorties
+                </Text>
+                <Text className='text-white'>
+                  {formatAmount(totalSent)} ({sentPercentage}%)
+                </Text>
+              </View>
+            </View>
+
+            <View className='flex-row justify-around mb-4'>
+              {["daily", "weekly", "monthly"].map((tf) => (
+                <TouchableOpacity
+                  key={tf}
+                  onPress={() => setTimeframe(tf)}
+                  className={`py-2 px-4 rounded-full ${
+                    timeframe === tf ? "bg-indigo-600" : "bg-gray-700"
+                  }`}
+                >
+                  <Text className='text-white capitalize'>{tf}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <FlatList
+              data={transactions}
+              keyExtractor={(item) => item._id.toString()}
+              renderItem={renderTransaction}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#6366f1"]}
+                />
+              }
+              ListEmptyComponent={
+                <Text className='text-gray-400 text-center mt-4'>
+                  Aucune transaction trouvée
+                </Text>
+              }
+            />
+          </>
+        )}
       </View>
     </SafeAreaView>
   );

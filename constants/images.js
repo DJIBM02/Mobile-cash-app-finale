@@ -14,6 +14,9 @@ import notification from "../assets/images/notification.png";
 import scalebalance from "../assets/images/scalebalance.png";
 import piechart from "../assets/images/piechart.png";
 import user from "../assets/images/user.png";
+import rotated from "../assets/images/rotated.png";
+import rotated2 from "../assets/images/rotated2.png";
+import atmcard from "../assets/images/atmcard.png";
 
 export default {
   profile,
@@ -32,4 +35,7 @@ export default {
   user,
   scalebalance,
   piechart,
+  rotated,
+  rotated2,
+  atmcard,
 };

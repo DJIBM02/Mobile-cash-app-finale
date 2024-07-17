@@ -3,70 +3,61 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { icons, images } from "../../constants";
-import "nativewind";
 import { Image } from "expo-image";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Create = () => {
   const headerHeight = useHeaderHeight();
 
+  const PaymentOption = ({ title, image, onPress }) => (
+    <TouchableOpacity
+      className='w-full h-24 rounded-xl mb-4 overflow-hidden'
+      onPress={onPress}
+    >
+      <LinearGradient
+        colors={["#2c3e50", "#34495e"]}
+        className='flex-1 flex-row items-center justify-between px-5'
+      >
+        <Text className='font-semibold text-lg text-white'>{title}</Text>
+        <Image source={image} contentFit='contain' className='w-20 h-10' />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView
       style={{ paddingTop: headerHeight }}
-      className='bg-primary flex-auto border border-black-200'
+      className='flex-1 bg-primary'
     >
-      <View className='flex-auto w-full justify-center items-center p-12 '>
+      <View className='flex-1 w-full justify-center items-center p-5'>
         <Image
           source={icons.purse}
-          className='w-[200px] h-[150px]'
-          contentFit='cover'
+          className='w-32 h-32 mb-5'
+          contentFit='contain'
         />
-        <Text className='font-psemibold text-lg text-white'>
+        <Text className='font-bold text-2xl text-white mb-8'>
           Recharge de compte
         </Text>
-        <View className='mt-6 w-full px-4'>
-          <Text className='font-pregular text-base text-white mb-2'>
-            choisir un mode de paiement
+        <View className='w-full'>
+          <Text className='font-semibold text-lg text-white mb-5 self-start'>
+            Choisir un mode de paiement
           </Text>
-          <TouchableOpacity
-            className='w-[295px] min-h-[91px] rounded-xl  flex items-center justify-center bg-gray-800 mb-4'
+          <PaymentOption
+            title='Orange Money'
+            image={images.OM}
             onPress={() => router.navigate("/OmDepot")}
-          >
-            <Text className='font-pregular text-base text-white mb-2'>
-              Orange Money
-            </Text>
-            <Image
-              source={images.OM}
-              contentFit='cover'
-              className='w-40 h-20 mt-2'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            className='w-[295px] min-h-[91px] rounded-xl p-2 flex items-center justify-center bg-gray-800 mb-4'
+          />
+          <PaymentOption
+            title='MTN-Mobile-Money'
+            image={images.momo}
             onPress={() => router.navigate("/MoMoDepot")}
-          >
-            <Text className='font-pregular text-base text-white mb-2'>
-              MTN-Mobile-Money
-            </Text>
-            <Image
-              source={images.momo}
-              contentFit='cover'
-              className='w-40 h-20 mt-2'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            className='w-[295px] min-h-[91px] rounded-xl  flex items-center justify-center bg-gray-800 mb-4'
-            onPress={() => router.navigate("/VisaDepot")}
-          >
-            <Text className='font-pregular text-base text-white mb-2'>
-              Visa-Card
-            </Text>
-            <Image
-              source={images.VISA}
-              contentFit='cover'
-              className='w-40 h-20 mt-2'
-            />
-          </TouchableOpacity>
+          />
+          <PaymentOption
+            title='Visa-Card'
+            image={images.VISA}
+            onPress={() => router.navigate("/Depot_carte")}
+          />
         </View>
       </View>
     </SafeAreaView>

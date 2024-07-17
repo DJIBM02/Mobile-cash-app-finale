@@ -1,25 +1,94 @@
-import { View, Text, Image, ScrollView } from "react-native";
 import React, { useState } from "react";
+import { View, Text, Image, ScrollView, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../../data/useLoggedInStatus"; // adjust the import path
 import "nativewind";
 
 const Connection = () => {
   const [form, setForm] = useState({
-    email: "",
+    credentials: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const router = useRouter();
+  const { setIsLoggedIn } = useAuth();
 
-  const submit = () => {};
+  const handleInputChange = (field, value) => {
+    setForm({ ...form, [field]: value });
+  };
+
+  const validateForm = () => {
+    if (!form.credentials || !form.password) {
+      setError("Both email and password are required.");
+      return false;
+    }
+    return true;
+  };
+
+  const submit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    console.log("form data:", form);
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await axios.post(
+        "http://192.168.43.238:3000/api/user/login",
+        form,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const { token } = response.data;
+
+        // Store the token in AsyncStorage
+        await AsyncStorage.setItem("token", token);
+        await AsyncStorage.setItem("isLoggedIn", "true");
+        setIsLoggedIn(true);
+        setSuccessMessage("Logged in successfully");
+        router.push("/home");
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Wrong credentials. Please try again.");
+      } else {
+        setError(
+          err.response?.data?.error ||
+            "An error occurred during login please try again."
+        );
+      }
+      console.log("error", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView className='bg-primary flex-1'>
       <ScrollView>
-        <View className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
+        <View
+          style={{
+            minHeight: Dimensions.get("window").height - 100,
+          }}
+          className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'
+        >
           <Image
             source={images.logo}
             resizeMode='contain'
@@ -33,20 +102,16 @@ const Connection = () => {
 
           <FormField
             title='Email'
-            value={form.email}
-            handleChangeText={(e) => setForm({ ...form, email: e })}
+            value={form.credentials}
+            handleChangeText={(e) => handleInputChange("credentials", e)}
             otherStyles='mt-4'
             keyboardType='email-address'
           />
 
-          <View className='flex justify-end items-end mt-1'>
-            <Text className='text-gray-100'>(Optionnel)</Text>
-          </View>
-
           <FormField
             title='Mot de passe'
             value={form.password}
-            handleChangeText={(e) => setForm({ ...form, password: e })}
+            handleChangeText={(e) => handleInputChange("password", e)}
             otherStyles='mt-4'
             secureTextEntry
           />
@@ -59,6 +124,18 @@ const Connection = () => {
               Mot de passe oublié?
             </Link>
           </View>
+
+          {error && (
+            <Text className='text-white mt-2 bg-red-500 p-2 rounded'>
+              {error}
+            </Text>
+          )}
+
+          {successMessage && (
+            <Text className='text-white mt-2 bg-green-500 p-2 rounded'>
+              {successMessage}
+            </Text>
+          )}
 
           <CustomButton
             title='Connexion'

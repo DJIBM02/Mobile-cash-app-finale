@@ -1,3 +1,4 @@
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -5,104 +6,162 @@ import {
   RefreshControl,
   TouchableOpacity,
   SafeAreaView,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
-import "nativewind";
-import ServicesContact from "../../components/ServicesContact";
-import SearchInput from "../../components/SearchInput";
-import EmptyState from "../../components/EmptyState";
-import { router } from "expo-router";
+import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useFocusEffect } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
-
-const transactions = [
-  {
-    id: 1,
-    status: "Transaction Successful",
-    date: "2023-06-24",
-    time: "12:34",
-    details: "Transaction ID: 12345",
-    amount: "$100",
-    recipient: "User A",
-  },
-  {
-    id: 2,
-    status: "Transaction Failed",
-    date: "2023-06-23",
-    time: "14:56",
-    details: "Transaction ID: 67890",
-    amount: "$50",
-    recipient: "User B",
-  },
-  // Add more transactions here
-];
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import "nativewind";
+import EmptyState from "../../components/EmptyState";
 
 const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [expandedId, setExpandedId] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    // Add refresh logic here
-    setRefreshing(false);
+  const fetchNotifications = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.get(
+        "http://192.168.43.238:3000/api/notifications",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setNotifications(response.data.notification || []);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotifications();
+    }, [])
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchNotifications();
+  };
+
+  const openModal = (notification) => {
+    setSelectedNotification(notification);
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setSelectedNotification(null);
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  };
+
   const headerHeight = useHeaderHeight();
 
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
+  if (isLoading) {
+    return (
+      <View className='flex-1 justify-center items-center bg-indigo-500'>
+        <ActivityIndicator size='large' color='#0000ff' />
+      </View>
+    );
+  }
+
+  const renderNotificationItem = ({ item }) => (
+    <TouchableOpacity
+      className={`bg-gray-400 rounded-lg mx-4 my-2 p-4 shadow ${
+        item.read ? "opacity-70" : "bg-blue-50"
+      }`}
+      onPress={() => openModal(item)}
+    >
+      <View className='flex-1'>
+        <Text className='text-base font-semibold text-gray-800 mb-1'>
+          {item.title}
+        </Text>
+        <Text className='text-sm text-gray-600 mb-2' numberOfLines={2}>
+          {item.description}
+        </Text>
+        <Text className='text-xs text-gray-400'>
+          {new Date(item.date).toLocaleString()}
+        </Text>
+      </View>
+      {!item.read && (
+        <View className='w-2 h-2 rounded-full bg-blue-500 absolute top-4 right-4' />
+      )}
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView
+      className='flex-1 bg-primary'
       style={{ paddingTop: headerHeight }}
-      className='bg-primary h-full border border-black-200'
     >
-      <View className='flex-1'>
-        <FlatList
-          data={transactions}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View className='bg-gray-800 p-4 m-2 rounded'>
-              <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-                <View className='flex-row justify-between items-center'>
-                  <Text className='text-xl font-semibold text-white'>
-                    {item.status}
-                  </Text>
-                  <Text className='text-lg font-semibold text-gray-300'>
-                    {item.date} {item.time}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-              {expandedId === item.id && (
-                <View className='mt-2'>
-                  <Text className='text-lg text-gray-300'>{item.details}</Text>
-                  <Text className='text-lg text-gray-300'>
-                    Amount: {item.amount}
-                  </Text>
-                  <Text className='text-lg text-gray-300'>
-                    Recipient: {item.recipient}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-          ListHeaderComponent={() => (
-            <View className='my-6 px-4 space-y-6'>
-              <ServicesContact posts={[]} />
-            </View>
-          )}
-          ListEmptyComponent={() => (
-            <EmptyState
-              title='Aucune notification'
-              subtitle='commencez des activités'
-              buttonTitle="Aller à la page d'accueil"
-              buttonAction={() => router.push("/home")}
-            />
-          )}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        />
-      </View>
+      <FlatList
+        data={notifications}
+        keyExtractor={(item) => item._id.toString()}
+        renderItem={renderNotificationItem}
+        ListEmptyComponent={() => (
+          <EmptyState
+            title='No notifications'
+            subtitle='Start some activities'
+            buttonTitle='Go to Home'
+            buttonAction={() => router.push("/home")}
+          />
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListHeaderComponent={
+          notifications.length > 0 && (
+            <TouchableOpacity
+              className='self-end px-4 py-2 mb-2'
+              onPress={markAllAsRead}
+            >
+              <Text className='text-blue-500 font-psemibold'>
+                Mark all as read
+              </Text>
+            </TouchableOpacity>
+          )
+        }
+      />
+
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType='slide'
+        onRequestClose={closeModal}
+      >
+        <View className='flex-1 justify-center items-center bg-transparent bg-opacity-50'>
+          <View className='bg-primary rounded-2xl p-6 w-11/12 max-h-4/5'>
+            <TouchableOpacity className='self-end mb-4' onPress={closeModal}>
+              <Ionicons name='close' size={24} color='red' />
+            </TouchableOpacity>
+            {selectedNotification && (
+              <>
+                <Text className='text-xl font-bold text-gray-400 mb-3'>
+                  {selectedNotification.title}
+                </Text>
+                <Text className='text-base text-gray-500 mb-4'>
+                  {selectedNotification.description}
+                </Text>
+                <Text className='text-sm text-gray-400'>
+                  {new Date(selectedNotification.date).toLocaleString()}
+                </Text>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

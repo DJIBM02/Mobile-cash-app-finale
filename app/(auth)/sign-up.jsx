@@ -1,22 +1,25 @@
+// @ts-nocheck
 import React, { useState } from "react";
 import {
   View,
   Text,
   Image,
   ScrollView,
-  TextInput,
   TouchableOpacity,
+  Alert,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import PasswordStrengthIndicator from "./TempFile";
 import "nativewind";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Alert } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import FormFieldError from "../../components/FormFieldError";
+import axios from "axios";
 
 const Inscription = () => {
   const [form, setForm] = useState({
@@ -24,19 +27,21 @@ const Inscription = () => {
     last_name: "",
     date_of_birth: new Date(),
     address: {
-      country: "",
       city: "",
       quarter: "",
+      country: "",
     },
     email: "",
-    number: "+237",
+    phone_number: "+237",
     password: "",
+    ConfirmPassword: "",
     pin: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const getPasswordStrength = (password) => {
     let strength = 0;
@@ -51,12 +56,84 @@ const Inscription = () => {
     return "faible";
   };
 
-  const submit = () => {
+  const validateForm = () => {
+    const {
+      first_name,
+      last_name,
+      date_of_birth,
+      address,
+      email,
+      phone_number,
+      password,
+      ConfirmPassword,
+      pin,
+    } = form;
+
+    let formErrors = {};
+
+    if (!first_name) formErrors.first_name = "Le nom est requis";
+    if (!last_name) formErrors.last_name = "Le prénom est requis";
+    if (!date_of_birth)
+      formErrors.date_of_birth = "La date de naissance est requise";
+    if (!address.country) formErrors.country = "Le pays est requis";
+    if (!address.city) formErrors.city = "La ville est requise";
+    if (!address.quarter) formErrors.quarter = "Le quartier est requis";
+    if (!email) formErrors.email = "L'email est requis";
+    if (!phone_number)
+      formErrors.phone_number = "Le numéro de téléphone est requis";
+    if (!password) formErrors.password = "Le mot de passe est requis";
+    if (!ConfirmPassword)
+      formErrors.ConfirmPassword = "la confirmation de mot de passe est requis";
+    if (!pin) formErrors.pin = "Le code PIN est requis";
+
+    setErrors(formErrors);
+
+    if (Object.keys(formErrors).length > 0) {
+      Alert.alert("Veuillez remplir tous les champs !");
+      return false;
+    }
+
+    return true;
+  };
+
+  const submit = async () => {
+    if (!validateForm()) return;
+
     setIsSubmitting(true);
-    // Add your API call or submission logic here
-    setIsSubmitting(false);
-    if (form.password !== form.confirmPassword) {
-      Alert.alert("Veuillez entrer les mêmes mots de passe !");
+
+    try {
+      const response = await axios.post(
+        "http://192.168.43.238:3000/api/user/create",
+        form,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        Alert.alert("Inscription réussie !");
+        router.replace("/sign-in");
+      } else {
+        Alert.alert("Erreur lors de l'inscription", response.message);
+      }
+    } catch (error) {
+      if (error.response) {
+        Alert.alert(
+          "Erreur lors de l'inscription",
+          error.response.data.message
+        );
+      } else if (error.request) {
+        Alert.alert(
+          "Erreur lors de l'inscription",
+          "No response from the server. Please check the server status."
+        );
+      } else {
+        Alert.alert("Erreur lors de l'inscription", error.message);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,7 +146,12 @@ const Inscription = () => {
   return (
     <SafeAreaView className='bg-primary h-full'>
       <ScrollView>
-        <View className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'>
+        <View
+          style={{
+            minHeight: Dimensions.get("window").height - 100,
+          }}
+          className='w-11/12 mx-auto justify-center min-h-[85vh] px-4 my-4'
+        >
           <Image
             source={images.logo}
             resizeMode='contain'
@@ -87,6 +169,7 @@ const Inscription = () => {
             otherStyles='mt-2'
             keyboardType='default'
           />
+          <FormFieldError error={errors.first_name} />
 
           <FormField
             title='Prénom'
@@ -95,10 +178,11 @@ const Inscription = () => {
             otherStyles='mt-2'
             keyboardType='default'
           />
+          <FormFieldError error={errors.last_name} />
 
           <View className='mt-2'>
             <Text className='text-white'>Date de naissance</Text>
-            <View className='flex-row  items-center'>
+            <View className='flex-row items-center'>
               <FormField
                 value={form.date_of_birth.toDateString()}
                 editable={false}
@@ -106,7 +190,7 @@ const Inscription = () => {
                 otherStyles='flex-1'
               />
               <TouchableOpacity
-                className='bg-indigo-600 mt-6  w-9 h-8 justify-center items-center rounded'
+                className='bg-indigo-600 mt-6 w-9 h-8 justify-center items-center rounded'
                 onPress={() => setShowDatePicker(true)}
               >
                 <AntDesign name='calendar' size={30} color='white' />
@@ -121,19 +205,7 @@ const Inscription = () => {
               />
             )}
           </View>
-
-          <FormField
-            title='Pays'
-            value={form.address.country}
-            handleChangeText={(e) =>
-              setForm({
-                ...form,
-                address: { ...form.address, country: e },
-              })
-            }
-            otherStyles='mt-2'
-            keyboardType='default'
-          />
+          <FormFieldError error={errors.date_of_birth} />
 
           <FormField
             title='Ville'
@@ -147,6 +219,7 @@ const Inscription = () => {
             otherStyles='mt-2'
             keyboardType='default'
           />
+          <FormFieldError error={errors.city} />
 
           <FormField
             title='Adresse de résidence'
@@ -160,6 +233,21 @@ const Inscription = () => {
             otherStyles='mt-2'
             keyboardType='default'
           />
+          <FormFieldError error={errors.quarter} />
+
+          <FormField
+            title='Pays'
+            value={form.address.country}
+            handleChangeText={(e) =>
+              setForm({
+                ...form,
+                address: { ...form.address, country: e },
+              })
+            }
+            otherStyles='mt-2'
+            keyboardType='default'
+          />
+          <FormFieldError error={errors.country} />
 
           <FormField
             title='Email'
@@ -168,16 +256,18 @@ const Inscription = () => {
             otherStyles='mt-2'
             keyboardType='email-address'
           />
+          <FormFieldError error={errors.email} />
 
           <View className='mt-2 flex-row items-center'>
             <FormField
-              value={form.number}
-              handleChangeText={(e) => setForm({ ...form, number: e })}
+              value={form.phone_number}
+              handleChangeText={(e) => setForm({ ...form, phone_number: e })}
               otherStyles='mt-2 flex-1'
               keyboardType='phone-pad'
               placeholder='Votre numéro'
             />
           </View>
+          <FormFieldError error={errors.phone_number} />
 
           <FormField
             title='Code Pin'
@@ -187,10 +277,7 @@ const Inscription = () => {
             keyboardType='phone-pad'
             placeholder='Code à 6 chiffres'
           />
-
-          <View className='justify-end items-end'>
-            <Text className='text-gray-100 mt-1'>(Optionnel)</Text>
-          </View>
+          <FormFieldError error={errors.pin} />
 
           <FormField
             title='Mot de passe'
@@ -202,16 +289,19 @@ const Inscription = () => {
             otherStyles='mt-2'
             secureTextEntry
           />
+          <FormFieldError error={errors.password} />
           <PasswordStrengthIndicator strength={passwordStrength} />
+
           <FormField
-            title='Confirmer le mot de passe'
-            value={form.confirmPassword}
-            handleChangeText={(e) => setForm({ ...form, confirmPassword: e })}
+            title='Confirmation du Mot de passe'
+            value={form.ConfirmPassword}
+            handleChangeText={(e) => {
+              setForm({ ...form, ConfirmPassword: e });
+              setPasswordStrength(getPasswordStrength(e));
+            }}
             otherStyles='mt-2'
             secureTextEntry
           />
-
-          <PasswordStrengthIndicator strength={passwordStrength} />
 
           <CustomButton
             title='Inscription'

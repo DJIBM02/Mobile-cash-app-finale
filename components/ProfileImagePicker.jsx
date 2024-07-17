@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, Alert, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import "nativewind";
 import { Ionicons } from "@expo/vector-icons";
 
-const ProfileImagePicker = ({ setProfileImage }) => {
-  const [image, setImage] = useState(null);
+const ProfileImagePicker = ({ initialImage, setProfileImage }) => {
+  const [image, setImage] = useState(initialImage);
+
+  useEffect(() => {
+    if (initialImage) {
+      setImage(initialImage);
+    }
+  }, [initialImage]);
 
   const pickImage = async () => {
     const permissionResult =

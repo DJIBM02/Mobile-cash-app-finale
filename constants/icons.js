@@ -1,6 +1,6 @@
 import bookmark from "../assets/icons/bookmark.svg";
 import home from "../assets/icons/home.svg";
-import plus from "../assets/icons/plus.png";
+import plus from "../assets/icons/plus.svg";
 import profile from "../assets/icons/profile.svg";
 import leftArrow from "../assets/icons/left-arrow.png";
 import menu from "../assets/icons/menu.png";

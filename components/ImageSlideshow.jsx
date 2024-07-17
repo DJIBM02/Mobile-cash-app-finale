@@ -1,102 +1,88 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Dimensions, Animated } from "react-native";
 import Swiper from "react-native-swiper";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+
+const localImages = [
+  require("../assets/images/thumbnail.png"),
+  require("../assets/images/cards.png"),
+  require("../assets/images/rotated.png"),
+  require("../assets/images/rotated2.png"),
+];
+
+const { width } = Dimensions.get("window");
 
 const ImageSlider = () => {
-  const [images, setImages] = useState([
-    {
-      source: "https://via.placeholder.com/800x400.png?text=First+Image",
-      url: "https://images.app.goo.gl/zXi9xbYGCZHaJnXv6",
-    }, // Sending money
-    {
-      source: "https://via.placeholder.com/800x400.png?text=Second+Image",
-      url: "https://example.com/second-image",
-    }, // Bill payment
-    {
-      source: "https://via.placeholder.com/800x400.png?text=Third+Image",
-      url: "https://example.com/Third-image",
-    }, // Bill payment
-    {
-      source: "https://via.placeholder.com/800x400.png?text=Fourth+Image",
-      url: "https://example.com/Fourth-image",
-    }, // Bill payment
-  ]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const animatedValues = useRef(
+    localImages.map(() => new Animated.Value(0))
+  ).current;
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setActiveIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000);
+    const animations = animatedValues.map((value, index) =>
+      Animated.timing(value, {
+        toValue: index === activeIndex ? 1 : 0,
+        duration: 300,
+        useNativeDriver: false,
+      })
+    );
+    Animated.parallel(animations).start();
+  }, [activeIndex]);
 
-    return () => clearInterval(intervalId);
-  }, [images]);
+  const PaginationDot = ({ index }) => {
+    const width = animatedValues[index].interpolate({
+      inputRange: [0, 1],
+      outputRange: [8, 24],
+    });
 
-  const styles = StyleSheet.create({
-    container: {
-      width: "100%",
-      height: 200, // Adjust height as needed
-      overflow: "hidden",
-    },
-    sliderImage: {
-      width: Dimensions.get("window").width,
-      height: "100%",
-      resizeMode: "cover",
-    },
-    paginationContainer: {
-      position: "absolute",
-      bottom: 10,
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "row",
-    },
-    paginationDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginHorizontal: 4,
-      backgroundColor: "gray",
-    },
-    paginationDotActive: {
-      backgroundColor: "#bef264",
-    },
-    overlay: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "black",
-      opacity: 0.5,
-    },
-  });
+    const opacity = animatedValues[index].interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.4, 1],
+    });
+
+    return (
+      <Animated.View
+        className='h-2 rounded-full mr-2'
+        style={{
+          width,
+          opacity,
+          backgroundColor: "#FFFFFF",
+        }}
+      />
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <Swiper autoplay loop onIndexChange={(index) => setActiveIndex(index)}>
-        {images.map((image) => (
-          <View key={image.source}>
-            <Image source={{ uri: image.source }} style={styles.sliderImage} />
-            <TouchableOpacity onPress={() => window.open(image.url)}>
-              <View style={styles.overlay} />
-            </TouchableOpacity>
+    <View className='w-full h-[235px] overflow-hidden relative rounded-3xl'>
+      <Swiper
+        autoplay
+        autoplayTimeout={5}
+        loop
+        onIndexChanged={setActiveIndex}
+        showsPagination={false}
+        scrollEnabled={true}
+        horizontal={true}
+        removeClippedSubviews={false}
+        bounces={true}
+      >
+        {localImages.map((image, index) => (
+          <View key={index} className='w-full h-full'>
+            <Image
+              source={image}
+              className='w-full h-full'
+              contentFit='cover'
+            />
+            <LinearGradient
+              colors={["transparent", "rgba(0,0,0,0.7)"]}
+              className='absolute left-0 right-0 bottom-0 h-[100px]'
+            />
           </View>
         ))}
       </Swiper>
-      <View style={styles.paginationContainer}>
-        {images.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.paginationDot,
-              index === activeIndex && styles.paginationDotActive,
-            ]}
-          />
+      <View className='absolute bottom-5 left-5 flex-row items-center'>
+        {localImages.map((_, index) => (
+          <PaginationDot key={index} index={index} />
         ))}
       </View>
     </View>

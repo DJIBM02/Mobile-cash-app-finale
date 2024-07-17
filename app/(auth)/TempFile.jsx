@@ -18,10 +18,10 @@ const PasswordStrengthIndicator = ({ strength }) => {
 
   return (
     <View className='flex-row gap-1 mt-1'>
-      <View className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
-      <View className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
-      <View className={`w-8 h-1 mt-2 rounded ${getColor()}`} />
-      <Text className='text-xs text-gray-400 mt-1'>
+      <View className={`w-12 h-1 mt-2 rounded ${getColor()}`} />
+      <View className={`w-12 h-1 mt-2 rounded ${getColor()}`} />
+      <View className={`w-12 h-1 mt-2 rounded ${getColor()}`} />
+      <Text className='text-xs text-gray-400 '>
         {strength === "fort"
           ? "fort"
           : strength === "medium"
