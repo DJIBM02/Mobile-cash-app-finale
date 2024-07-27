@@ -1,9 +1,11 @@
+// @ts-nocheck
 import React, { useRef, useCallback, useState } from "react";
 import { StyleSheet, Platform, View, Button, Text } from "react-native";
 import CreditCard from "react-native-credit-card-form-ui";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import ReactNativeModal from "react-native-modal";
+import { useIP } from "../../data/IPContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function App() {
@@ -12,6 +14,7 @@ export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalMessageColor, setModalMessageColor] = useState("green");
+  const IpAddress = useIP();
 
   const handleSubmit = useCallback(async () => {
     if (creditCardRef.current) {
@@ -57,7 +60,7 @@ export default function App() {
         console.log("REQUEST DATA: ", cardData);
         const token = await AsyncStorage.getItem("token");
         const response = await axios.post(
-          "http://192.168.43.238:3000/api/creditcard/add", // Ensure this matches your API endpoint
+          `${IpAddress}/api/creditcard/add`, // Ensure this matches your API endpoint
           cardData,
           {
             headers: {

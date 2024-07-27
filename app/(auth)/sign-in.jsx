@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from "react";
 import { View, Text, Image, ScrollView, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,6 +9,7 @@ import { Link, useRouter } from "expo-router";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../data/useLoggedInStatus"; // adjust the import path
+import { useIP } from "../../data/IPContext";
 import "nativewind";
 
 const Connection = () => {
@@ -20,6 +22,7 @@ const Connection = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const router = useRouter();
   const { setIsLoggedIn } = useAuth();
+  const ipAddress = useIP(); // Directly get the IP address
 
   const handleInputChange = (field, value) => {
     setForm({ ...form, [field]: value });
@@ -45,15 +48,11 @@ const Connection = () => {
     setSuccessMessage(null);
 
     try {
-      const response = await axios.post(
-        "http://192.168.43.238:3000/api/user/login",
-        form,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(`${ipAddress}/api/user/login`, form, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.status === 200) {
         const { token } = response.data;
@@ -116,7 +115,7 @@ const Connection = () => {
             secureTextEntry
           />
 
-          <View className='flex justify-end pt-1'>
+          <View className='items-end justify-end pt-1'>
             <Link
               href='/resetPassword'
               className='text-secondary-100 underline mt-1'

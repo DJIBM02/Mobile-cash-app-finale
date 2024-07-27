@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   View,
   Text,
@@ -22,11 +23,6 @@ const MenuPopUp = () => {
       title: "Charte",
       icon: "linechart",
       action: () => router.push("/charte"),
-    },
-    {
-      title: "Paramétre",
-      icon: "setting",
-      action: () => router.navigate("/params"),
     },
   ];
 

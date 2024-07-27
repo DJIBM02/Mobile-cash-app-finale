@@ -19,6 +19,7 @@ import { router } from "expo-router";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "nativewind";
+import { useIP } from "../../data/IPContext";
 
 const API_ENDPOINT = "http://192.168.43.238:3000/api/transaction/mobile-charge";
 const PHONE_REGEX = /^[0-9]{9}$/; // Assumes 9-digit phone numbers, adjust as needed
@@ -30,6 +31,7 @@ const MoMo_Dépot = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [formErrors, setFormErrors] = useState({});
   const [transactionDetails, setTransactionDetails] = useState(null);
+  const Ipaddress = useIP();
 
   const validateForm = useCallback(() => {
     const errors = {};
@@ -65,7 +67,7 @@ const MoMo_Dépot = () => {
     try {
       const token = await AsyncStorage.getItem("token");
       const response = await axios.post(
-        API_ENDPOINT,
+        `${Ipaddress}/api/transaction/mobile-charge`,
         {
           phone: form.number,
           amount: parseFloat(form.amount),
@@ -130,12 +132,12 @@ const MoMo_Dépot = () => {
             <Text className='text-lg text-black ml-4'>{"mobileRecharge"}</Text>
           </View>
           <ServicesDépot
-            title={"makeDeposit"}
+            title={"faire un dépot"}
             imageSource={images.momo}
-            containerStyle='bg-primary'
+            containerStyle='bg-transparent'
             titleStyle='text-black'
           />
-          <View className='pb-5 w-full px-4'>
+          <View className='pb-5 w-full px-6'>
             <FormField
               title={"phoneNumber"}
               value={form.number}
@@ -156,21 +158,22 @@ const MoMo_Dépot = () => {
           {errorMessage ? (
             <Text className='text-red-500 text-center'>{errorMessage}</Text>
           ) : null}
-          <CustomButton
-            title={"makeDeposit"}
-            handlePress={submitTransaction}
-            containerStyle='justify-center items-center'
-            className='rounded-full bg-blue-500 py-2 px-4 mt-4'
-            isLoading={isSubmitting}
-          />
-          {errorMessage && (
+          <View className='pl-6'>
             <CustomButton
-              title={"retry"}
-              handlePress={retryTransaction}
+              title={"faire le dépot"}
+              handlePress={submitTransaction}
               containerStyle='justify-center items-center'
-              className='rounded-full bg-gray-500 py-2 px-4 mt-2'
+              isLoading={isSubmitting}
             />
-          )}
+            {errorMessage && (
+              <CustomButton
+                title={"retry"}
+                handlePress={retryTransaction}
+                containerStyle='justify-center items-center'
+                className='rounded-full bg-gray-500 py-2 px-4 mt-2'
+              />
+            )}
+          </View>
         </View>
 
         <Modal

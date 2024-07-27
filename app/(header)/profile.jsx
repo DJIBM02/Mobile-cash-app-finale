@@ -9,45 +9,49 @@ import {
   Alert,
   Image,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../constants";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIP } from "../../data/IPContext";
 import "nativewind";
-
-const fetchUserProfile = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        profileImage: images.profile, // Replace with the actual image source
-        username: "Dj_Ibm02",
-        email: "dj_ibm02@example.com",
-        phoneNumber: "+1234567890",
-        cardNumber: "1234567890123456",
-      });
-    }, 1000);
-  });
-};
-
-const formatCardNumber = (number, reveal) => {
-  if (!number) return "";
-  return reveal
-    ? number
-    : `${number.slice(0, 4)}${number.slice(4).replace(/./g, "*")}`;
-};
+import axios from "axios";
 
 const Profile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [profile, setProfile] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const [showCardNumber, setShowCardNumber] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
+  const Ipaddress = useIP();
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.get(`${Ipaddress}/api/user/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("User data:", response.data);
+      const { data } = response;
+      setLoading(false);
+      setUser(data.user);
+    } catch (error) {
+      console.log("Error fetching user data:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserProfile();
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const userProfile = await fetchUserProfile();
-    setProfile(userProfile);
+    await fetchUserProfile();
     setRefreshing(false);
   };
 
@@ -88,26 +92,31 @@ const Profile = () => {
             <View className='my-6 px-4 space-y-6 items-center'>
               <TouchableOpacity onPress={() => setModalVisible(true)}>
                 <Image
-                  source={profile.profileImage}
+                  source={profile.profileImage || images.profile}
                   className='w-32 h-32 rounded-full mb-6'
                 />
               </TouchableOpacity>
               <Text className='text-2xl font-psemibold text-white'>
-                {profile.username}
+                {user?.first_name} {user?.last_name}
               </Text>
-              <Text className='text-lg text-gray-300'>{profile.email}</Text>
+              <Text className='text-lg text-gray-300'>{user?.email}</Text>
               <Text className='text-lg text-gray-300'>
-                {profile.phoneNumber}
+                {user?.phone_number}
+              </Text>
+              <Text className='text-base font-pregular text-gray-300 mt-2'>
+                Date: {user?.created}
               </Text>
               <TouchableOpacity
                 className='flex-row items-center'
                 onPress={toggleCardNumberVisibility}
               >
-                <Text className='text-lg text-gray-300'>
-                  N° Carte:{" "}
-                  <Text className='text-white text-xl font-pmedium'>
-                    {formatCardNumber(profile.cardNumber, showCardNumber)}
-                  </Text>
+                <Text className='text-base font-pregular text-white mt-2'>
+                  Balance:{" "}
+                  {showCardNumber
+                    ? `${
+                        user?.wallet?.account_balance?.$numberDecimal || "0"
+                      } ${user?.wallet?.currency}`
+                    : "********"}
                 </Text>
                 <Image
                   source={showCardNumber ? icons.eyeHide : icons.eye}
@@ -143,7 +152,7 @@ const Profile = () => {
             <Text className='text-white text-2xl'>×</Text>
           </TouchableOpacity>
           <Image
-            source={profile.profileImage}
+            source={profile.profileImage || images.profile}
             className='w-96 h-96'
             resizeMode='contain'
           />

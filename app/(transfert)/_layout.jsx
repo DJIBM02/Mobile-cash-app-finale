@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -108,9 +109,57 @@ const TransfertLayout = () => {
         />
 
         <Stack.Screen
+          name='Retrait'
+          options={{
+            headerTitle: "Retrait avec mobile",
+            headerStyle: { backgroundColor: "#6b7280" },
+            headerTransparent: true,
+            headerLargeTitleStyle: { color: "#bef264" },
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
+          }}
+        />
+
+        <Stack.Screen
+          name='OmRetrait'
+          options={{
+            headerTitle: "Retrait avec OrangeMoney",
+            headerStyle: { backgroundColor: "#6b7280" },
+            headerTransparent: true,
+            headerLargeTitleStyle: { color: "#bef264" },
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
+          }}
+        />
+
+        <Stack.Screen
+          name='MoMoRetrait'
+          options={{
+            headerTitle: "Retrait avec Mtn Mobile Money",
+            headerStyle: { backgroundColor: "#6b7280" },
+            headerTransparent: true,
+            headerLargeTitleStyle: { color: "#bef264" },
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
+          }}
+        />
+
+        <Stack.Screen
           name='Dépot_bancair'
           options={{
             headerTitle: "Dépot avec carte bancaire",
+            headerStyle: { backgroundColor: "#6b7280" },
+            headerTransparent: true,
+            headerLargeTitleStyle: { color: "#bef264" },
+            headerLargeTitleShadowVisible: true,
+            headerShadowVisible: true,
+          }}
+        />
+
+        <Stack.Screen
+          name='TransactionModal'
+          options={{
+            headerTitle: "Scanner pour Payé",
             headerStyle: { backgroundColor: "#6b7280" },
             headerTransparent: true,
             headerLargeTitleStyle: { color: "#bef264" },

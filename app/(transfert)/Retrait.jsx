@@ -8,7 +8,7 @@ import { Image } from "expo-image";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { LinearGradient } from "expo-linear-gradient";
 
-const Create = () => {
+const Retrait = () => {
   const headerHeight = useHeaderHeight();
 
   const PaymentOption = ({ title, image, onPress }) => (
@@ -47,17 +47,12 @@ const Create = () => {
           <PaymentOption
             title='Orange Money'
             image={images.OM}
-            onPress={() => router.navigate("/OmDepot")}
+            onPress={() => router.navigate("/OmRetrait")}
           />
           <PaymentOption
             title='MTN-Mobile-Money'
             image={images.momo}
-            onPress={() => router.navigate("/MoMoDepot")}
-          />
-          <PaymentOption
-            title='Visa-Card'
-            image={images.VISA}
-            onPress={() => router.navigate("/Depot_carte")}
+            onPress={() => router.navigate("/MoMoRetrait")}
           />
         </View>
       </View>
@@ -65,4 +60,4 @@ const Create = () => {
   );
 };
 
-export default Create;
+export default Retrait;

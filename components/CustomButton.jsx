@@ -1,3 +1,4 @@
+// @ts-nocheck
 // components/CustomButton.jsx
 
 import { TouchableOpacity, Text } from "react-native";

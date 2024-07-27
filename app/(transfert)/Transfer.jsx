@@ -1,20 +1,26 @@
+// @ts-nocheck
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, Text, ScrollView, Modal } from "react-native";
+import { View, Text, ScrollView, Modal, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import axios from "axios";
+import { useIP } from "../../data/IPContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Constants
-const API_BASE_URL = "http://192.168.1.198:3000/api";
 const ERROR_MESSAGES = {
   NO_TOKEN: "No authentication token found. Please log in again.",
   MISSING_FIELDS: "Receiver email and amount are required.",
   NETWORK_ERROR: "Network error. Please check your connection and try again.",
   UNKNOWN_ERROR: "An unknown error occurred. Please try again later.",
 };
+
+// Custom close icon component
+const CloseIcon = () => (
+  <Text style={{ fontSize: 24, fontWeight: "bold", color: "red" }}>×</Text>
+);
 
 const Transfer = () => {
   const router = useRouter();
@@ -23,7 +29,7 @@ const Transfer = () => {
     () => (contact ? JSON.parse(contact) : null),
     [contact]
   );
-
+  const Ipaddress = useIP();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     receiverEmail: "",
@@ -62,7 +68,7 @@ const Transfer = () => {
   const createTransaction = async (token) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/transaction/create`,
+        `${Ipaddress}/api/transaction/create`,
         {
           receiver: form.receiverEmail,
           amount: parseFloat(form.amount),
@@ -113,7 +119,7 @@ const Transfer = () => {
       if (!token) throw new Error(ERROR_MESSAGES.NO_TOKEN);
 
       const response = await axios.put(
-        `${API_BASE_URL}/transaction/confirm/${transactionId}`,
+        `${Ipaddress}/api/transaction/confirm/${transactionId}`,
         { pin: form.pin },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -187,35 +193,47 @@ const Transfer = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className='flex-1 justify-center items-center bg-transparent bg-opacity-50'>
-          <View className='bg-primary p-5 rounded-lg w-4/5'>
-            <Text className='text-xl text-white font-bold mb-4'>
-              Confirm Transaction
-            </Text>
-            <Text className='text-md text-white font-psemibold mb-4'>
-              Receveur: {form.receiverEmail}
-            </Text>
-            <Text className='text-md text-white font-psemibold mb-4'>
-              Montant: {form.amount}
-            </Text>
+        <View className='flex-1 justify-center items-center bg-neutral bg-opacity-50'>
+          <View className='bg-primary p-6 rounded-2xl w-11/12 max-w-md'>
+            <View className='flex-row justify-between items-center mb-4'>
+              <Text className='text-2xl font-bold text-white'>
+                Confirm Transaction
+              </Text>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                className='p-2'
+              >
+                <CloseIcon />
+              </TouchableOpacity>
+            </View>
+
+            <View className='bg-gray-400 p-4 rounded-lg mb-4'>
+              <Text className='text-lg text-gray-600 mb-2'>
+                Receiver:{" "}
+                <Text className='font-bold text-primary'>
+                  {form.receiverEmail}
+                </Text>
+              </Text>
+              <Text className='text-lg text-gray-600'>
+                Amount/FCFA:{" "}
+                <Text className='font-bold text-primary'>{form.amount}</Text>
+              </Text>
+            </View>
+
             <FormField
-              title='PIN'
+              title='Enter your PIN'
               value={form.pin}
               handleChangeText={(e) => handleInputChange("pin", e)}
               keyboardType='numeric'
               secureTextEntry={true}
+              otherStyles='mb-4'
             />
+
             <CustomButton
-              title='Confirm'
+              title='Confirm Transfer'
               handlePress={handleTransactionConfirmation}
-              containerStyle='mt-3'
-              isLoading={isSubmitting}
-            />
-            <CustomButton
-              title='Cancel'
-              handlePress={() => setModalVisible(false)}
               containerStyle='mt-2'
-              type='secondary'
+              isLoading={isSubmitting}
             />
           </View>
         </View>

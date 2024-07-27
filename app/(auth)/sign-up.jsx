@@ -19,6 +19,7 @@ import "nativewind";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FormFieldError from "../../components/FormFieldError";
+import { useIP } from "../../data/IPContext";
 import axios from "axios";
 
 const Inscription = () => {
@@ -42,6 +43,7 @@ const Inscription = () => {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [errors, setErrors] = useState({});
+  const Ipaddress = useIP();
 
   const getPasswordStrength = (password) => {
     let strength = 0;
@@ -102,15 +104,11 @@ const Inscription = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(
-        "http://192.168.43.238:3000/api/user/create",
-        form,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(`${Ipaddress}/api/user/create`, form, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.status === 201) {
         Alert.alert("Inscription réussie !");

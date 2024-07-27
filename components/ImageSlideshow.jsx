@@ -1,5 +1,6 @@
+// @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
-import { View, Dimensions, Animated } from "react-native";
+import { View, Dimensions, Animated, Text } from "react-native";
 import Swiper from "react-native-swiper";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,6 +10,26 @@ const localImages = [
   require("../assets/images/cards.png"),
   require("../assets/images/rotated.png"),
   require("../assets/images/rotated2.png"),
+];
+
+const adTexts = [
+  {
+    title: "Instant Money Transfers with MaGeNo ",
+    subtitle:
+      "Send money to anyone, anywhere, anytime! Using MaGeNo is consuming Cameroonian product together let's make Cameroon a real continent",
+  },
+  {
+    title: "Secure Transactions",
+    subtitle: "Your money is safe with our advanced encryption",
+  },
+  {
+    title: "Low Fees, High Rewards",
+    subtitle: "Enjoy the best rates and earn cashback on transfers",
+  },
+  {
+    title: "Local Reach",
+    subtitle: "Transfer money all over the territorial nation Cameroon",
+  },
 ];
 
 const { width } = Dimensions.get("window");
@@ -35,12 +56,10 @@ const ImageSlider = () => {
       inputRange: [0, 1],
       outputRange: [8, 24],
     });
-
     const opacity = animatedValues[index].interpolate({
       inputRange: [0, 1],
       outputRange: [0.4, 1],
     });
-
     return (
       <Animated.View
         className='h-2 rounded-full mr-2'
@@ -74,9 +93,17 @@ const ImageSlider = () => {
               contentFit='cover'
             />
             <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.7)"]}
-              className='absolute left-0 right-0 bottom-0 h-[100px]'
+              colors={["transparent", "rgba(0,0,0,0.8)"]}
+              className='absolute left-0 right-0 bottom-0 h-[150px]'
             />
+            <View className='absolute bottom-10 left-5 right-5'>
+              <Text className='text-white text-2xl font-bold mb-2'>
+                {adTexts[index].title}
+              </Text>
+              <Text className='text-white text-base'>
+                {adTexts[index].subtitle}
+              </Text>
+            </View>
           </View>
         ))}
       </Swiper>

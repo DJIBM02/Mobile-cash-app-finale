@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { View, Text, TextInput, Image, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";

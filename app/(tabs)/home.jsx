@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -18,6 +19,7 @@ import MenuPopUp from "../../components/MenuPopUp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import CustomExitModal from "../../components/CustomExitModal";
+import { useIP } from "../../data/IPContext";
 import "nativewind";
 
 const Home = () => {
@@ -27,15 +29,19 @@ const Home = () => {
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [user, setUser] = useState(null);
   const [exitModalVisible, setExitModalVisible] = useState(false);
-
+  const Ipaddress = useIP();
   async function getData() {
     try {
       const token = await AsyncStorage.getItem("token");
-      const res = await axios.get("http://192.168.43.238:3000/api/user/", {
-        headers: { Authorization: `Bearer ${token}` },
+      console.log("Token retrieved from AsyncStorage:", token); // Debugging
+      if (!token) return;
+      const res = await axios.get(`${Ipaddress}/api/user/`, {
+        headers: { Authorization: `Bearer ${token} ` },
       });
+      console.log("API response:", res.data); // Debugging
       const { data } = res;
       setUser(data.user);
+      console.log("User data set:", data.user); // Debugging
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -50,6 +56,7 @@ const Home = () => {
   useFocusEffect(
     useCallback(() => {
       BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+      getData();
       return () => {
         BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
       };
@@ -148,6 +155,7 @@ const Home = () => {
             />
             <Text className='text-white font-medium text-base'>Dépot</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             className='w-20 h-20 rounded-xl bg-gray-800 justify-center items-center'
             onPress={() => router.navigate("Scanner")}
@@ -158,6 +166,18 @@ const Home = () => {
               contentFit='cover'
             />
             <Text className='text-white font-medium text-base'>Scanner</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className='w-20 h-20 rounded-xl bg-gray-800 justify-center items-center'
+            onPress={() => router.navigate("Retrait")}
+          >
+            <Image
+              source={icons.rightArrow}
+              className='w-8 h-8 mb-2'
+              contentFit='cover'
+            />
+            <Text className='text-white font-medium text-base'>Retrait</Text>
           </TouchableOpacity>
           <TouchableOpacity
             className='w-20 h-20 rounded-xl bg-gray-800 justify-center items-center'

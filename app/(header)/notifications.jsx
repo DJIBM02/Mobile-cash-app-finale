@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+// @ts-nocheck
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -16,6 +17,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "nativewind";
 import EmptyState from "../../components/EmptyState";
+import { useIP } from "../../data/IPContext";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -23,16 +25,14 @@ const Notifications = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const Ipaddress = useIP();
 
   const fetchNotifications = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const response = await axios.get(
-        "http://192.168.43.238:3000/api/notifications",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${Ipaddress}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setNotifications(response.data.notification || []);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
@@ -48,26 +48,65 @@ const Notifications = () => {
     }, [])
   );
 
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchNotifications();
-  };
+  }, []);
 
-  const openModal = (notification) => {
+  const openModal = useCallback((notification) => {
     setSelectedNotification(notification);
     setIsModalVisible(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalVisible(false);
     setSelectedNotification(null);
-  };
+  }, []);
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
-  };
+  const markAllAsRead = useCallback(() => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((n) => ({ ...n, read: true }))
+    );
+  }, []);
 
   const headerHeight = useHeaderHeight();
+
+  const renderNotificationItem = useCallback(
+    ({ item }) => (
+      <TouchableOpacity
+        className={`bg-gray-200 rounded-lg mx-4 my-2 p-4 shadow ${
+          item.read ? "opacity-70" : "bg-blue-50"
+        }`}
+        onPress={() => openModal(item)}
+      >
+        <View className='flex-1'>
+          <Text
+            className='text-base font-semibold text-gray-800 mb-1'
+            numberOfLines={1}
+            ellipsizeMode='tail'
+          >
+            {item.title}
+          </Text>
+          <Text
+            className='text-sm text-gray-600 mb-2'
+            numberOfLines={2}
+            ellipsizeMode='tail'
+          >
+            {item.description}
+          </Text>
+          <Text className='text-xs text-gray-400'>
+            {new Date(item.date).toLocaleString()}
+          </Text>
+        </View>
+        {!item.read && (
+          <View className='w-2 h-2 rounded-full bg-blue-500 absolute top-4 right-4' />
+        )}
+      </TouchableOpacity>
+    ),
+    [openModal]
+  );
+
+  const memoizedNotifications = useMemo(() => notifications, [notifications]);
 
   if (isLoading) {
     return (
@@ -77,47 +116,16 @@ const Notifications = () => {
     );
   }
 
-  const renderNotificationItem = ({ item }) => (
-    <TouchableOpacity
-      className={`bg-gray-400 rounded-lg mx-4 my-2 p-4 shadow ${
-        item.read ? "opacity-70" : "bg-blue-50"
-      }`}
-      onPress={() => openModal(item)}
-    >
-      <View className='flex-1'>
-        <Text className='text-base font-semibold text-gray-800 mb-1'>
-          {item.title}
-        </Text>
-        <Text className='text-sm text-gray-600 mb-2' numberOfLines={2}>
-          {item.description}
-        </Text>
-        <Text className='text-xs text-gray-400'>
-          {new Date(item.date).toLocaleString()}
-        </Text>
-      </View>
-      {!item.read && (
-        <View className='w-2 h-2 rounded-full bg-blue-500 absolute top-4 right-4' />
-      )}
-    </TouchableOpacity>
-  );
-
   return (
     <SafeAreaView
-      className='flex-1 bg-primary'
+      className='flex-1 justify-center items-center bg-primary'
       style={{ paddingTop: headerHeight }}
     >
       <FlatList
-        data={notifications}
+        data={memoizedNotifications}
         keyExtractor={(item) => item._id.toString()}
         renderItem={renderNotificationItem}
-        ListEmptyComponent={() => (
-          <EmptyState
-            title='No notifications'
-            subtitle='Start some activities'
-            buttonTitle='Go to Home'
-            buttonAction={() => router.push("/home")}
-          />
-        )}
+        ListEmptyComponent={EmptyState}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -142,16 +150,16 @@ const Notifications = () => {
         onRequestClose={closeModal}
       >
         <View className='flex-1 justify-center items-center bg-transparent bg-opacity-50'>
-          <View className='bg-primary rounded-2xl p-6 w-11/12 max-h-4/5'>
+          <View className='bg-primary rounded-xl p-6 w-11/12 max-h-4/5'>
             <TouchableOpacity className='self-end mb-4' onPress={closeModal}>
               <Ionicons name='close' size={24} color='red' />
             </TouchableOpacity>
             {selectedNotification && (
               <>
-                <Text className='text-xl font-bold text-gray-400 mb-3'>
+                <Text className='text-xl font-bold text-gray-200 mb-3'>
                   {selectedNotification.title}
                 </Text>
-                <Text className='text-base text-gray-500 mb-4'>
+                <Text className='text-base text-gray-300 mb-4'>
                   {selectedNotification.description}
                 </Text>
                 <Text className='text-sm text-gray-400'>

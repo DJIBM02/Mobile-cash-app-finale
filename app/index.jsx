@@ -1,5 +1,6 @@
+// @ts-nocheck
 // MainComponent.js or your main component
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,18 +13,46 @@ import { images } from "../constants";
 import CustomButton from "../components/CustomButton";
 import { useAuth } from "../data/useLoggedInStatus"; // adjust the import path
 import Loader from "../components/Loader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, Redirect } from "expo-router";
 import "nativewind";
 
 const MainComponent = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const { isLoggedIn, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    async function checkLoggedInState() {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        if (authLoading) {
+          setLoading(true);
+          return;
+        }
+
+        if (!isLoggedIn && !token) {
+          setLoggedIn(true);
+        } else {
+          setLoggedIn(false);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkLoggedInState();
+  }, [isLoggedIn, authLoading]);
 
   if (loading) {
     return <Loader isLoading={loading} />;
   }
 
-  if (!isLoggedIn) {
-    router.replace("/home");
+  if (loggedIn) {
+    return <Redirect href='/home' />;
   }
 
   return (

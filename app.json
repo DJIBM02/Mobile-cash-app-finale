@@ -30,7 +30,9 @@
       [
         "expo-barcode-scanner",
         {
-          "cameraPermission": "Allow $(MaGeNo) to access camera."
+          "cameraPermission": "Allow $(MaGeNo) to access camera.",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
         }
       ]
     ]

@@ -1,7 +1,9 @@
+// @ts-nocheck
 import React, { useEffect, useState } from "react";
 import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { AuthProvider } from "../data/useLoggedInStatus";
+import { IPProvider } from "../data/IPContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,14 +38,19 @@ const RootLayout = () => {
 
   return (
     <AuthProvider>
-      <Stack>
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-        <Stack.Screen name='index' options={{ headerShown: false }} />
-        <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-        <Stack.Screen name='(transfert)' options={{ headerShown: false }} />
-        <Stack.Screen name='(header)' options={{ headerShown: false }} />
-        <Stack.Screen name='search/[query]' options={{ headerShown: false }} />
-      </Stack>
+      <IPProvider>
+        <Stack>
+          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+          <Stack.Screen name='index' options={{ headerShown: false }} />
+          <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+          <Stack.Screen name='(transfert)' options={{ headerShown: false }} />
+          <Stack.Screen name='(header)' options={{ headerShown: false }} />
+          <Stack.Screen
+            name='search/[query]'
+            options={{ headerShown: false }}
+          />
+        </Stack>
+      </IPProvider>
     </AuthProvider>
   );
 };

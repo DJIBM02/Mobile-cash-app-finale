@@ -1,7 +1,39 @@
-import { View, Text } from "react-native";
-import { Tabs } from "expo-router";
-import { icons } from "../../constants";
+// @ts-nocheck
+import React, { useState } from "react";
+import { View, Text, Dimensions } from "react-native";
 import { Image } from "expo-image";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { icons } from "../../constants";
+
+const initialLayout = { width: Dimensions.get("window").width };
+
+const HomeScreen = () => (
+  <View>
+    <Text>Home Screen</Text>
+  </View>
+);
+const CreateScreen = () => (
+  <View>
+    <Text>Create Screen</Text>
+  </View>
+);
+const BookmarkScreen = () => (
+  <View>
+    <Text>Bookmark Screen</Text>
+  </View>
+);
+const LitScreen = () => (
+  <View>
+    <Text>Lit Screen</Text>
+  </View>
+);
+
+const renderScene = SceneMap({
+  home: HomeScreen,
+  create: CreateScreen,
+  bookmark: BookmarkScreen,
+  lit: LitScreen,
+});
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -23,84 +55,41 @@ const TabIcon = ({ icon, color, name, focused }) => {
 };
 
 const TabsLayout = () => {
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: "home", title: "Accueil", icon: icons.home },
+    { key: "create", title: "Contact", icon: icons.profile },
+    { key: "bookmark", title: "Historique", icon: icons.bookmark },
+    { key: "lit", title: "Litige", icon: icons.plus },
+  ]);
+
+  const renderTabBar = (props) => (
+    <TabBar
+      {...props}
+      renderIcon={({ route, focused, color }) => (
+        <TabIcon
+          icon={route.icon}
+          color={color}
+          name={route.title}
+          focused={focused}
+        />
+      )}
+      indicatorStyle={{ backgroundColor: "#bef264" }}
+      style={{ backgroundColor: "#161622" }}
+      activeColor='#bef264'
+      inactiveColor='#CDCDE0'
+    />
+  );
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: "#bef264",
-        tabBarInactiveTintColor: "#CDCDE0",
-        tabBarStyle: {
-          backgroundColor: "#161622",
-          borderTopWidth: 1 / 2,
-          borderTopColor: "#4b5563",
-          height: 58,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name='home'
-        options={{
-          title: "home",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={icons.home}
-              color={color}
-              name='Accueil'
-              focused={focused}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name='create'
-        options={{
-          title: "create",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={icons.profile}
-              color={color}
-              name='contact'
-              focused={focused}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name='bookmark'
-        options={{
-          title: "Bookmark",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={icons.bookmark}
-              color={color}
-              name='Historique'
-              focused={focused}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name='lit'
-        options={{
-          title: "Litige",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={icons.plus}
-              color={color}
-              name='Litige'
-              focused={focused}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={initialLayout}
+      renderTabBar={renderTabBar}
+      swipeEnabled={true}
+    />
   );
 };
 

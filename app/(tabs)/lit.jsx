@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from "react";
 import {
   View,
@@ -14,11 +15,13 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import "nativewind";
+import { useIP } from "../../data/IPContext";
 
 const Litige = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const Ipaddress = useIP();
 
   const handleSubmit = async () => {
     if (title.trim() === "" || description.trim() === "") {
@@ -30,7 +33,7 @@ const Litige = () => {
     try {
       const token = await AsyncStorage.getItem("token");
       const response = await axios.post(
-        "http://192.168.43.238:3000/api/litigation/create",
+        `${Ipaddress}/api/litigation/create`,
         { title, description },
         { headers: { Authorization: `Bearer ${token}` } }
       );

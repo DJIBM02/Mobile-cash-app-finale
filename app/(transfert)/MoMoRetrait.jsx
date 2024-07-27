@@ -18,12 +18,12 @@ import ServicesDépot from "./ServicesDépot";
 import { router } from "expo-router";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useIP } from "../../data/IPContext";
 import "nativewind";
+import { useIP } from "../../data/IPContext";
 
 const PHONE_REGEX = /^[0-9]{9}$/; // Assumes 9-digit phone numbers, adjust as needed
 
-const MoMo_Dépot = () => {
+const MoMoRetrait = () => {
   const [form, setForm] = useState({ number: "", amount: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -66,7 +66,7 @@ const MoMo_Dépot = () => {
     try {
       const token = await AsyncStorage.getItem("token");
       const response = await axios.post(
-        `${Ipaddress}/api/transaction/mobile-charge`,
+        `${Ipaddress}/api/transaction/mobile-withdraw`,
         {
           phone: form.number,
           amount: parseFloat(form.amount),
@@ -131,9 +131,9 @@ const MoMo_Dépot = () => {
             <Text className='text-lg text-black ml-4'>{"mobileRecharge"}</Text>
           </View>
           <ServicesDépot
-            title={"Faire un dépot"}
-            imageSource={images.OM}
-            containerStyle='bg-transparent'
+            title={"Faire un retrait"}
+            imageSource={images.momo}
+            containerStyle='bg-primary'
             titleStyle='text-black'
           />
           <View className='pb-5 w-full px-6'>
@@ -157,14 +157,13 @@ const MoMo_Dépot = () => {
           {errorMessage ? (
             <Text className='text-red-500 text-center'>{errorMessage}</Text>
           ) : null}
-          <View className='pl-4'>
+          <View className='pl-6'>
             <CustomButton
-              title={"Faire le dépot"}
+              title={"Faire le retrait"}
               handlePress={submitTransaction}
               containerStyle='justify-center items-center'
               isLoading={isSubmitting}
             />
-
             {errorMessage && (
               <CustomButton
                 title={"retry"}
@@ -211,4 +210,4 @@ const MoMo_Dépot = () => {
   );
 };
 
-export default MoMo_Dépot;
+export default MoMoRetrait;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   View,
   Text,
@@ -19,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
+import { useIP } from "../../data/IPContext";
 import ReactNativeModal from "react-native-modal";
 
 const Create = () => {
@@ -29,6 +31,7 @@ const Create = () => {
   const [loading, setLoading] = useState(true);
   const [imageZoomVisible, setImageZoomVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const Ipaddress = useIP();
 
   const fetchContacts = useCallback(async () => {
     setLoading(true);
@@ -37,12 +40,9 @@ const Create = () => {
       if (!token) {
         throw new Error("No token found");
       }
-      const response = await axios.get(
-        `http://192.168.43.238:3000/api/contacts`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${Ipaddress}/api/contacts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setContacts(response.data || []);
     } catch (error) {
       console.error("Error fetching contacts:", error);
@@ -71,7 +71,7 @@ const Create = () => {
         throw new Error("No token found");
       }
       const response = await axios.post(
-        `http://192.168.1.198:3000/api/contact/add/${contactId}`,
+        `http://192.168.43.238:3000/api/contact/add/${contactId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
